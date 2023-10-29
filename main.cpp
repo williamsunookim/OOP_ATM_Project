@@ -7,43 +7,77 @@ using namespace std;
 
 //Forward declaration
 class Account;
+class Card;
 class ATM;
 class Bank;
+
 
 
 //Classes declaration
 class User{
 private:
-
+    vector<Account*> Account_list;
 public:
 
 };
 
 //one Account, one Bank
+//#############
+//###Account###
+//#############
 class Account{
 private:
-    Bank bank_info
-    
+    Bank* bank;
+    Card* card;
 
 public:
-
+    Account(Bank* aBank , Card* aCard);
+    Bank* get_Bank();
 };
+Bank* Account::get_Bank(){
+    return bank;
+};
+Account::Account(Bank* aBank, Card* aCard){
+    bank = aBank;
+    card = aCard;
+}
 
+//#############
+//####Card#####
+//#############
+class Card{
+private:
+    string CardNum;
+    //bank를 쓸까말까
+public:
+    string get_card_number();
+};
+string Card::get_card_number(){
+    return CardNum;
+}
+
+//#############
+//####Bank#####
+//#############
 class Bank{
 private:
     string bank_name;
+
 public:
     Bank(string name);
-    string get_bank_game();
+    string get_bank_name();
 };
 
 Bank::Bank(string name){
     bank_name = name;
 }
-string Bank::get_bank_game(){
+string Bank::get_bank_name(){
     return bank_name;
 }
 
+//#############
+//#####Atm#####
+//#############
 class ATM {
 private:
     //ATM 선언 때 선언되는 변수들
