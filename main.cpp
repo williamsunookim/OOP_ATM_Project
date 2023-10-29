@@ -6,9 +6,44 @@
 using namespace std;
 
 //Forward declaration
+class Account;
 class ATM;
+class Bank;
+
 
 //Classes declaration
+class User{
+private:
+
+public:
+
+};
+
+//one Account, one Bank
+class Account{
+private:
+    Bank bank_info
+    
+
+public:
+
+};
+
+class Bank{
+private:
+    string bank_name;
+public:
+    Bank(string name);
+    string get_bank_game();
+};
+
+Bank::Bank(string name){
+    bank_name = name;
+}
+string Bank::get_bank_game(){
+    return bank_name;
+}
+
 class ATM {
 private:
     //ATM 선언 때 선언되는 변수들
@@ -52,6 +87,11 @@ bool ATM::get_ATM_type(){
 
 
 int main(){
+    Bank* DaeguBank = new Bank("Daegu");
+    Bank* KookMinBank = new Bank("Kookmin");
+    Bank* WooriBank = new Bank("Woori");
+    Bank* ShinHanBank = new Bank("ShinHan");
+    Bank* NongHyupBank = new Bank("NonghHyup");
 
     return 0;
 }
