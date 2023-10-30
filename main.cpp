@@ -86,10 +86,10 @@ private:
     bool isbilingual; //isbilingual은 이 atm이 두 가지의 언어를 지원하는지 알려줌 -> false면 영어만 언어 지원 (REQ 1.3)
     bool isSingle; //isSingle은 이 atm이 하나의 은행만 가능한지 두 가지 다 가능한지 알려줌 -> true이면 한 개만 됨 (REQ 1.2)
 
-    static int order_number;
+    Bank* bank;
 
-    string unique_number = ""; // ATM마다 다른 고유 식별 번호, 6자리
-    
+    static int order_number;
+    string unique_number = ""; // ATM마다 다른 고유 식별 번호, 6자리  
     string transaction_history = ""; //거래 내역을 담는 곳
 
     const int NonPrimaryDepositFee = 1000; //다른 은행 예금 수수료 (REQ 1.8)
@@ -107,7 +107,7 @@ private:
 
 
 public:
-    ATM(const bool language_option, bool ATM_type, int cash);
+    ATM(const bool language_option, Bank* bank_info, bool ATM_type, int cash);
 
     bool get_language(); // true면 영어라는 뜻, false면 한국어라는 뜻
     bool get_ATM_type(); // isSinlge을 반환
@@ -116,8 +116,16 @@ public:
 };
 
 int ATM::order_number = 0;
-ATM::ATM(const bool language_option, bool ATM_type, int cash){
+ATM::ATM(const bool language_option, Bank* bank_info, bool ATM_type, int cash){
+    bank = bank_info;
     order_number++;
+    string front = to_string((int)bank->get_bank_name()[0]);
+    string back = to_string(order_number);
+    string tmp = "";
+    for(int i = 0; i<6-front.size()-back.size(); i++){
+        tmp+="0";
+    }
+    unique_number = front + tmp +back;
 
     isbilingual = language_option;
     isSingle = ATM_type;
@@ -146,7 +154,7 @@ int main(){
         cout<<"Bank name: ";
         cin>>bank_name;
         if(bank_name=="0" || bank_name=="zero"){
-            cout<<"Current banks inputted are [";
+            cout<<"Banks you inputted are [";
             for(int i = 0; i<Bank_list.size(); i++){
                 cout<<Bank_list[i]->get_bank_name();
                 if(i==Bank_list.size()-1) break;
@@ -157,6 +165,35 @@ int main(){
         }
         Bank_list.push_back(new Bank(bank_name));
     }
+    cout<<'\n';
+    //ATM input
+    vector<ATM*> ATM_list;
+    cout<<"This is ATM input section. If you're done, input 0 or \"zero\"\n";
+    int i = 1;
+    while(1){
+        cout<<"-----"<<i<<"th ATM info-----\n";
+        //language_option(Unilingual/Bilingual) input
+        cout<<"ATM Type(Unilingual/Bilingual): ";
+        string language_option;
+        cin>>language_option;
+        bool IsBilingual;
+        if(language_option == "0" || language_option=="zero") break;
+        if(language_option[0] == 'B' || language_option[0] == 'b') IsBilingual = true;
+        else IsBilingual = false;
+        //Bank input
+        cout<<"Current banks list:";
+        for(int i = 0; i<Bank_list.size(); i++){
+            cout<<i+1<<". "<<Bank_list[i]->get_bank_name();
+            cout<<"\n";
+        }
+        cout<<"Which Bank does this ATM use? Input the number of Bank: ";
+        int bank_index;
+        cin>>bank_index;
+        //cash input
+        //bank_type(Single/Multiple) input
+        ATM_list.push_back(new ATM(IsBilingual, Bank_list[bank_index-1], ))
+    }
+    //Account input
 
     return 0;
 }
