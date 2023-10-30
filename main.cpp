@@ -1,7 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include <string.h>
-#include <vector> //쓸 지는 모르겠음
+#include <vector>
 
 using namespace std;
 
@@ -33,6 +33,7 @@ private:
 public:
     Account(Bank* aBank , Card* aCard);
     Bank* get_Bank();
+    string get_Bank_name();
 };
 Bank* Account::get_Bank(){
     return bank;
@@ -78,11 +79,18 @@ string Bank::get_bank_name(){
 //#############
 //#####Atm#####
 //#############
+
 class ATM {
 private:
     //ATM 선언 때 선언되는 변수들
     bool isbilingual; //isbilingual은 이 atm이 두 가지의 언어를 지원하는지 알려줌 -> false면 영어만 언어 지원 (REQ 1.3)
     bool isSingle; //isSingle은 이 atm이 하나의 은행만 가능한지 두 가지 다 가능한지 알려줌 -> true이면 한 개만 됨 (REQ 1.2)
+
+    static int order_number;
+
+    string unique_number = ""; // ATM마다 다른 고유 식별 번호, 6자리
+    
+    string transaction_history = ""; //거래 내역을 담는 곳
 
     const int NonPrimaryDepositFee = 1000; //다른 은행 예금 수수료 (REQ 1.8)
     const int PrimaryWithdrawalFee = 1000; //같은 은행 출금 수수료 (REQ 1.8)
@@ -103,9 +111,14 @@ public:
 
     bool get_language(); // true면 영어라는 뜻, false면 한국어라는 뜻
     bool get_ATM_type(); // isSinlge을 반환
+    string get_unique_number();
 
 };
+
+int ATM::order_number = 0;
 ATM::ATM(const bool language_option, bool ATM_type, int cash){
+    order_number++;
+
     isbilingual = language_option;
     isSingle = ATM_type;
     AmountOfCash = cash;
@@ -118,14 +131,32 @@ bool ATM::get_language(){
 bool ATM::get_ATM_type(){
     return isSingle;
 }
+string ATM::get_unique_number(){
+    return unique_number;
+}
 
 
 int main(){
-    Bank* DaeguBank = new Bank("Daegu");
-    Bank* KookMinBank = new Bank("Kookmin");
-    Bank* WooriBank = new Bank("Woori");
-    Bank* ShinHanBank = new Bank("ShinHan");
-    Bank* NongHyupBank = new Bank("NonghHyup");
+    // test case: Daegu, Kookmin, Woori, ShinHan, NonghHyup
+    //Bank input
+    vector<Bank*> Bank_list;
+    cout<<"Write down the Bank's name. If you're done, input 0 or \"zero\"\n";
+    while(1){
+        string bank_name;
+        cout<<"Bank name: ";
+        cin>>bank_name;
+        if(bank_name=="0" || bank_name=="zero"){
+            cout<<"Current banks inputted are [";
+            for(int i = 0; i<Bank_list.size(); i++){
+                cout<<Bank_list[i]->get_bank_name();
+                if(i==Bank_list.size()-1) break;
+                cout<<", ";
+            }
+            cout<<"]\n";
+            break;
+        }
+        Bank_list.push_back(new Bank(bank_name));
+    }
 
     return 0;
 }
