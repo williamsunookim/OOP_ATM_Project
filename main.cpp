@@ -180,6 +180,7 @@ int main(){
         if(language_option == "0" || language_option=="zero") break;
         if(language_option[0] == 'B' || language_option[0] == 'b') IsBilingual = true;
         else IsBilingual = false;
+        cout<<"This ATM will be "<<language_option<<'\n';
         //Bank input
         cout<<"Current banks list:";
         for(int i = 0; i<Bank_list.size(); i++){
@@ -189,9 +190,22 @@ int main(){
         cout<<"Which Bank does this ATM use? Input the number of Bank: ";
         int bank_index;
         cin>>bank_index;
+        cout<<"You chose "<<Bank_list[bank_index-1]<<'\n';
         //cash input
+        cout<<"How much cash will this ATM have: ";
+        long long cash;
+        cin>>cash;
+        cout<<"This ATM will have "<<cash<<"Won\n";
         //bank_type(Single/Multiple) input
-        ATM_list.push_back(new ATM(IsBilingual, Bank_list[bank_index-1], ))
+        cout<<"What kind of type will this ATM be(Single/Multiple)";
+        string bank_type;
+        cin>>bank_type;
+        bool IsSingle;
+        if(bank_type[0] == 'S' || bank_type[0] == 's') IsSingle = true;
+        else IsSingle = false;
+        cout<<"This ATM will be"<<bank_type<<'\n';
+        // input
+        ATM_list.push_back(new ATM(IsBilingual, Bank_list[bank_index-1], cash, IsSingle));
     }
     //Account input
 
