@@ -100,23 +100,26 @@ private:
     const int NonPrimarytoNonPrimaryFee = 4000; // 다른 은행끼리 송금 수수료 (REQ 1.8)
     const int CashTransferFee = 5000; //무통장 송금 수수료 (REQ 1.8)
     
-    int AmountOfCash;
+    long long AmountOfCash;
 
     //ATM 호출 때 선언되는 변수들
     int language_type; // 1이면 영어, 2이면 한국어 (REQ 1.3)
 
 
 public:
-    ATM(const bool language_option, Bank* bank_info, bool ATM_type, int cash);
+    ATM(const bool language_option, Bank* bank_info, bool ATM_type, long long cash);
 
+    bool get_language_option();
     bool get_language(); // true면 영어라는 뜻, false면 한국어라는 뜻
     bool get_ATM_type(); // isSinlge을 반환
+    string get_bank_name();
     string get_unique_number();
+    long long get_cash();
 
 };
 
 int ATM::order_number = 0;
-ATM::ATM(const bool language_option, Bank* bank_info, bool ATM_type, int cash){
+ATM::ATM(const bool language_option, Bank* bank_info, bool ATM_type, long long cash){
     bank = bank_info;
     order_number++;
     string front = to_string((int)bank->get_bank_name()[0]);
@@ -131,6 +134,9 @@ ATM::ATM(const bool language_option, Bank* bank_info, bool ATM_type, int cash){
     isSingle = ATM_type;
     AmountOfCash = cash;
 }
+bool ATM::get_language_option(){
+    return isbilingual;
+}
 bool ATM::get_language(){
     if(!isbilingual) return true; // unilingual이면 영어만 지원함
     if(language_type == 1) return true;
@@ -139,8 +145,14 @@ bool ATM::get_language(){
 bool ATM::get_ATM_type(){
     return isSingle;
 }
+string ATM::get_bank_name(){
+    return this->bank->get_bank_name();
+}
 string ATM::get_unique_number(){
     return unique_number;
+}
+long long ATM::get_cash(){
+    return AmountOfCash;
 }
 
 
@@ -205,10 +217,23 @@ int main(){
         else IsSingle = false;
         cout<<"This ATM will be "<<bank_type<<'\n';
         // input
-        ATM_list.push_back(new ATM(IsBilingual, Bank_list[bank_index-1], cash, IsSingle));
+        ATM_list.push_back(new ATM(IsBilingual, Bank_list[bank_index-1], IsSingle, cash));
         index++;
+        cout<<'\n';
     }
+    cout<<'\n';
     //Account input
+    for(int i = 0; i<ATM_list.size(); i++){
+        ATM* tmp_atm(ATM_list[i]);
+        cout<<"-------------"<<i+1<<"th ATM info-------------\n";
+        cout<<"|Bank: "<<tmp_atm->get_bank_name()<<"\n";
+        cout<<"|ATM Language Option: "<<((tmp_atm->get_language_option())?"Bilingual":"Unilingual")<<"\n";
+        cout<<"|ATM type: "<<((tmp_atm->get_ATM_type()) ? "Single" : "Multiple")<<"\n";
+        cout<<"|ATM unique number: "<<tmp_atm->get_unique_number()<<"\n";
+        cout<<"|Remaining cash: "<<tmp_atm->get_cash()<<"\n";
+        cout<<"--------------------------------------\n";
+        cout<<'\n';
+    }
 
     return 0;
 }
