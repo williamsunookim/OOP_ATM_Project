@@ -26,31 +26,37 @@ public:
 //###Account###
 //#############
 class Account{
-private:
+protected:
     Bank* bank;
     Card* card;
-
 public:
+    Account();
     Account(Bank* aBank , Card* aCard);
     Bank* get_Bank();
     string get_Bank_name();
 };
-Bank* Account::get_Bank(){
-    return bank;
-};
+Account::Account(){
+    ;
+}
 Account::Account(Bank* aBank, Card* aCard){
     bank = aBank;
     card = aCard;
+}
+Bank* Account::get_Bank(){
+    return bank;
+}
+string Account::get_Bank_name(){
+    return bank->get_bank_name();
 }
 
 //#############
 //####Card#####
 //#############
-class Card{
-private:
+class Card: Account{
+protected:
     string CardNum;
-    //bank를 쓸까말까
 public:
+    Card(string CardNum);
     string get_card_number();
 };
 string Card::get_card_number(){
@@ -62,6 +68,7 @@ string Card::get_card_number(){
 //#############
 class Bank{
 private:
+    vector<Account*> Account_list;
     string bank_name;
 
 public:
@@ -223,6 +230,11 @@ int main(){
     }
     cout<<'\n';
     //Account input
+
+    cout<<"This is Account input session. If you're done, input 0 or \"zero\"\n";
+    
+
+    //print ATM
     for(int i = 0; i<ATM_list.size(); i++){
         ATM* tmp_atm(ATM_list[i]);
         cout<<"-------------"<<i+1<<"th ATM info-------------\n";
