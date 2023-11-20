@@ -17,7 +17,6 @@ class Bank;
 class User{
 private:
     vector<Account*> Account_list;
-public:
 
 };
 
@@ -26,7 +25,7 @@ public:
 //###Account###
 //#############
 class Account{
-protected:
+private:
     Bank* bank;
     Card* card;
 public:
@@ -35,9 +34,6 @@ public:
     Bank* get_Bank();
     string get_Bank_name();
 };
-Account::Account(){
-    ;
-}
 Account::Account(Bank* aBank, Card* aCard){
     bank = aBank;
     card = aCard;
@@ -45,14 +41,12 @@ Account::Account(Bank* aBank, Card* aCard){
 Bank* Account::get_Bank(){
     return bank;
 }
-string Account::get_Bank_name(){
-    return bank->get_bank_name();
-}
+
 
 //#############
 //####Card#####
 //#############
-class Card: Account{
+class Card{
 protected:
     string CardNum;
 public:
@@ -81,6 +75,9 @@ Bank::Bank(string name){
 }
 string Bank::get_bank_name(){
     return bank_name;
+}
+string Account::get_Bank_name(){
+    return bank->get_bank_name();
 }
 
 //#############
@@ -206,10 +203,30 @@ int main(){
             cout<<i+1<<". "<<Bank_list[i]->get_bank_name();
             cout<<"\n";
         }
-        cout<<"Which Bank does this ATM use? Input the number of Bank: ";
-        int bank_index;
-        cin>>bank_index;
-        cout<<"You chose "<<Bank_list[bank_index-1]->get_bank_name()<<'\n';
+        cout<<"Which Bank does this ATM use? ";
+        string bank_name;
+        int bank_index = -1;
+        try
+        {
+            cin>>bank_name;
+            for(int i = 0; i<Bank_list.size(); i++){
+                if(Bank_list[i]->get_bank_name() == bank_name){
+                    bank_index = i;
+                    break;
+                }
+            }
+            if(bank_index==-1){
+                throw bank_name;
+            }
+        }
+        catch(string x)
+        {
+            cout<<"There is no such bank \""<<x<<"\"\n\n";
+            continue;
+        }
+        
+        
+        cout<<"You chose "<<bank_name<<'\n';
         //cash input
         cout<<"How much cash will this ATM have: ";
         long long cash;
