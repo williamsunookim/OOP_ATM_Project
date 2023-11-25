@@ -17,6 +17,7 @@ class Bank;
 class User{
 private:
     vector<Account*> Account_list;
+    vector<string> Transaction_history;
 
 };
 
@@ -183,7 +184,9 @@ int main(){
     // test case: Daegu, Kookmin, Woori, ShinHan, NonghHyup
     //Bank input
     vector<Bank*> Bank_list;
-    cout<<"Write down the Bank's name. If you're done, input 0 or \"zero\"\n";
+    cout << "Please Insert Card" << '\n';
+    cout << "Write down the Bank's name. If you're done, input 0 or \"zero\"\n";
+    // 은행별로 번호 주고 선택하라고 하는 게 낫지 않나?
     while(1){
         string bank_name;
         cout<<"Bank name: ";
