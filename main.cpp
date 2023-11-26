@@ -180,10 +180,7 @@ void ATM::get_cash(){
 }
 
 
-int main(){
-    // test case: Daegu, Kookmin, Woori, ShinHan, NonghHyup
-    //Bank input
-    vector<Bank*> Bank_list;
+void Initial_Condition_Input(vector<Bank*>& Bank_list, vector<ATM*>& ATM_list, vector<Account*>& Account_list){
     cout << "Please Insert Card" << '\n';
     cout << "Write down the Bank's name. If you're done, input 0 or \"zero\"\n";
     // 은행별로 번호 주고 선택하라고 하는 게 낫지 않나?
@@ -205,7 +202,6 @@ int main(){
     }
     cout<<'\n';
     //ATM input
-    vector<ATM*> ATM_list;
     cout<<"This is ATM input section. If you're done, input 0 or \"zero\"\n";
     int index = 1;
     while(1){
@@ -272,6 +268,7 @@ int main(){
         cout<<"Current cash amount of this ATM:"<<'\n';
         ATM_list[index-1]->get_cash();
         index++;
+        cout<<"-----------------------";
         cout<<'\n';
     }
     cout<<"\n\n";
@@ -290,7 +287,6 @@ int main(){
     }
     cout<<"\n\n";
     //Account input
-    vector<Account*> Account_list;
     cout<<"This is Account input session. If you're done, input 0 or \"zero\"\n";
     index = 1;
     while(1){
@@ -343,6 +339,7 @@ int main(){
         //input
         Account_list.push_back(new Account(Bank_list[bank_index],user_name, account_number, cash));
         index++;
+        cout<<"---------------------------";
         cout<<'\n';
     }
     cout<<"\n\n";
@@ -357,6 +354,16 @@ int main(){
         cout<<"--------------------------------------\n";
         cout<<'\n';
     }
+
+}
+
+int main(){
+    // test case: Daegu, Kookmin, Woori, ShinHan, NonghHyup
+    //Bank input
+    vector<Bank*> Bank_list;
+    vector<ATM*> ATM_list;
+    vector<Account*> Account_list;
+    Initial_Condition_Input(Bank_list, ATM_list, Account_list);
 
     return 0;
 }
