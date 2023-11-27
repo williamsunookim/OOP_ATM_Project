@@ -18,8 +18,21 @@ class User{
 private:
     vector<Account*> Account_list;
     vector<string> Transaction_history;
-
+    string NameofUser;
+public:
+    User(string name);
+    void attach(Account* account);
+    string get_user_name();
 };
+User::User(string name){
+    NameofUser = name;
+}
+void User::attach(Account* account){
+    Account_list.push_back(account);
+}
+string User::get_user_name(){
+    return NameofUser;
+}
 
 //one Account, one Bank
 //#############
@@ -180,7 +193,7 @@ void ATM::get_cash(){
 }
 
 
-void Initial_Condition_Input(vector<Bank*>& Bank_list, vector<ATM*>& ATM_list, vector<Account*>& Account_list){
+void Initial_Condition_Input(vector<Bank*>& Bank_list, vector<ATM*>& ATM_list, vector<Account*>& Account_list, vector<User*>& User_list){
     cout << "Please Insert Card" << '\n';
     cout << "Write down the Bank's name. If you're done, input 0 or \"zero\"\n";
     // 은행별로 번호 주고 선택하라고 하는 게 낫지 않나?
@@ -286,6 +299,22 @@ void Initial_Condition_Input(vector<Bank*>& Bank_list, vector<ATM*>& ATM_list, v
         cout<<'\n';
     }
     cout<<"\n\n";
+    //User input
+    cout<<"This is User input session. If you're done, input 0 or \"zero\"\n";
+    index = 1;
+    while(1){
+        cout<<"-----"<<index<<"th user input-----\n";
+        cout<<"Input the user name: ";
+        string name;
+        cin>>name;
+        if(name=="0" || name=="zero"){
+            break;
+        }
+        User_list.push_back(new User(name));
+        index++;
+        cout<<"---------------------------";
+        cout<<'\n';
+    }
     //Account input
     cout<<"This is Account input session. If you're done, input 0 or \"zero\"\n";
     index = 1;
@@ -338,6 +367,11 @@ void Initial_Condition_Input(vector<Bank*>& Bank_list, vector<ATM*>& ATM_list, v
         cout<<"This account will have "<<cash<<" won\n";
         //input
         Account_list.push_back(new Account(Bank_list[bank_index],user_name, account_number, cash));
+        for(int i = 0; i<User_list.size(); i++){
+            if(user_name == User_list[i]->get_user_name()){
+                User_list[i]->attach(Account_list[index-1]);
+            }
+        }
         index++;
         cout<<"---------------------------";
         cout<<'\n';
@@ -363,7 +397,9 @@ int main(){
     vector<Bank*> Bank_list;
     vector<ATM*> ATM_list;
     vector<Account*> Account_list;
-    Initial_Condition_Input(Bank_list, ATM_list, Account_list);
+    vector<User*> User_list;
+    Initial_Condition_Input(Bank_list, ATM_list, Account_list, User_list);
+
 
     return 0;
 }
