@@ -12,8 +12,27 @@ class ATM;
 class Bank;
 
 
-
 //Classes declaration
+
+//#########################
+//#####FinancialEntity#####
+//#########################
+class FinancialEntity {
+protected:
+    string name;
+
+public:
+    FinancialEntity(string name) : name(name) {}
+    string get_name();
+};
+
+string FinancialEntity::get_name(){
+    return name;
+}
+
+//##############
+//#####User#####
+//##############
 class User{
 private:
     vector<Account*> Account_list;
@@ -38,7 +57,7 @@ string User::get_user_name(){
 //#############
 //###Account###
 //#############
-class Account{
+class Account : public FinancialEntity{
 private:
     Bank* bank;
     string NameofUser;
@@ -50,9 +69,10 @@ public:
     string get_Bank_name();
     string get_user_name();
     string get_account_number();
+    string get_Bank_name();
     long long get_cash();
 };
-Account::Account(Bank* aBank, string user_name, string account_number, long long cash){
+Account::Account(Bank* aBank, string user_name, string account_number, long long cash) : FinancialEntity(aBank->get_bank_name()){
     bank = aBank;
     NameofUser = user_name;
     NumofAccount = account_number;
@@ -88,7 +108,7 @@ string Card::get_card_number(){
 //#############
 //####Bank#####
 //#############
-class Bank{
+class Bank : public FinancialEntity{
 private:
     vector<Account*> Account_list;
     string bank_name;
@@ -98,21 +118,22 @@ public:
     string get_bank_name();
 };
 
-Bank::Bank(string name){
+Bank::Bank(string name) : FinancialEntity(name){
     bank_name = name;
 }
 string Bank::get_bank_name(){
-    return bank_name;
+    return name;
 }
 string Account::get_Bank_name(){
-    return bank->get_bank_name();
+    return name;
 }
 
+
 //#############
-//#####Atm#####
+//#####ATM#####
 //#############
 
-class ATM {
+class ATM  : public FinancialEntity{
 private:
     //ATM 선언 때 선언되는 변수들
     bool isbilingual; //isbilingual은 이 atm이 두 가지의 언어를 지원하는지 알려줌 -> false면 영어만 언어 지원 (REQ 1.3)
@@ -151,7 +172,7 @@ public:
 };
 
 int ATM::order_number = 0;
-ATM::ATM(const bool language_option, Bank* bank_info, bool ATM_type, vector<int>& initial_cash){
+ATM::ATM(const bool language_option, Bank* bank_info, bool ATM_type, vector<int>& initial_cash) : FinancialEntity(bank_info->get_bank_name()){
     bank = bank_info;
     order_number++;
     string front = to_string((int)bank->get_bank_name()[0]);
@@ -396,11 +417,15 @@ void Initial_Condition_Input(){
 
 }
 
+void main_session(){
+
+}
+
 int main(){
     // test case: Daegu, Kookmin, Woori, ShinHan, NonghHyup
     //Bank input
     Initial_Condition_Input();
-
+    main_session();
 
     return 0;
 }
