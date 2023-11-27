@@ -192,8 +192,12 @@ void ATM::get_cash(){
     cout<<"50000 won: "<<AmountOfCash[3]<<'\n';
 }
 
+vector<Bank*> Bank_list;
+vector<ATM*> ATM_list;
+vector<Account*> Account_list;
+vector<User*> User_list;
 
-void Initial_Condition_Input(vector<Bank*>& Bank_list, vector<ATM*>& ATM_list, vector<Account*>& Account_list, vector<User*>& User_list){
+void Initial_Condition_Input(){
     cout << "Please Insert Card" << '\n';
     cout << "Write down the Bank's name. If you're done, input 0 or \"zero\"\n";
     // 은행별로 번호 주고 선택하라고 하는 게 낫지 않나?
@@ -315,6 +319,7 @@ void Initial_Condition_Input(vector<Bank*>& Bank_list, vector<ATM*>& ATM_list, v
         cout<<"---------------------------";
         cout<<'\n';
     }
+    cout<<"\n\n";
     //Account input
     cout<<"This is Account input session. If you're done, input 0 or \"zero\"\n";
     index = 1;
@@ -394,11 +399,7 @@ void Initial_Condition_Input(vector<Bank*>& Bank_list, vector<ATM*>& ATM_list, v
 int main(){
     // test case: Daegu, Kookmin, Woori, ShinHan, NonghHyup
     //Bank input
-    vector<Bank*> Bank_list;
-    vector<ATM*> ATM_list;
-    vector<Account*> Account_list;
-    vector<User*> User_list;
-    Initial_Condition_Input(Bank_list, ATM_list, Account_list, User_list);
+    Initial_Condition_Input();
 
 
     return 0;
