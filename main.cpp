@@ -210,36 +210,92 @@ long long ATM::get_total_cash(){
     return AmountOfCash[0]*1000 + AmountOfCash[1] * 5000 + AmountOfCash[2] * 10000 + AmountOfCash[3] * 50000;
 }
 
-string bank_names[6] = {"Kookmin", "Woori", "Hana", "Shinhan", "Nonghyeop", "Kakao"};
+// [7] = {"", "Kookmin", "Woori", "Hana", "Shinhan", "Nonghyeop", "Kakao"};
 vector<Bank*> Bank_list;
 vector<ATM*> ATM_list;
 vector<Account*> Account_list;
 vector<User*> User_list;
 
-void Initial_Condition_Input(){
-    cout << "Process : Initializing "
-    cout << "Write down the Bank's name. If you're done, input 0 or \"zero\"\n";
-    // 은행별로 번호 주고 선택하라고 하는 게 낫지 않나?
+void Set_Initial_Condition(){
+    // BANK
+    cout << "Process 01 : Initializing Bank Information" << '\n';
+    cout << "Give the Bank's name. If you're done, input 0" << '\n';
     while(1){
         string bank_name;
-        cout<<"Bank name: ";
-        cin>>bank_name;
-        if(bank_name=="0" || bank_name=="zero"){
-            cout<<"Banks you inputted are [";
-            for(int i = 0; i<Bank_list.size(); i++){
-                cout<<Bank_list[i]->get_bank_name();
-                if(i==Bank_list.size()-1) break;
-                cout<<", ";
-            }
-            cout<<"]\n";
-            break;
-        }
+        cin >> bank_name;
+        if(bank_name == "0") break;
         Bank_list.push_back(new Bank(bank_name));
     }
-    cout<<'\n';
-    //ATM input
-    cout<<"This is ATM input section. If you're done, input 0 or \"zero\"\n";
+    cout << "\n\n";
+    // USER
+    cout << "Process 02 : Initializing User Information" << '\n';
+    cout << "Give the User's name. If you're done, input 0" << '\n';
     int index = 1;
+    while(1){
+        cout << "-----" << index << "th user input-----" << '\n';
+        cout << "User's name : ";
+        string name;
+        cin >> name;
+        if(name == "0") break;
+        User_list.push_back(new User(name));
+        index++;
+        cout<<"---------------------------";
+        cout<<'\n';
+    }
+    cout << "\n\n";
+    // ACCOUNT
+    cout << "Process 03 : Initializing Account Information" << '\n';
+    cout << "Give the account's information. If you're done, input 0" << '\n';
+    index = 1;
+    while(1){
+        cout << "-----" << index << "th account input-----" << '\n';
+        cout << "Select the Bank the account belongs to. Here are the options of the banks." << '\n';
+        for(int i = 0; i<Bank_list.size(); i++){
+            cout << "[" << i << "]" << Bank_list[i]->get_bank_name() << "Bank" << '\n';
+        }
+        int bank_index;
+        cin >> bank_index;
+        cout << Bank_list[bank_index]->get_bank_name() << "Bank Selected" << '\n';
+        //user name input
+        cout << "User\'s name of the account : ";
+        string user_name;
+        cin >> user_name;
+        cout << "This account\'s user name is " << user_name << '\n';
+        //account number input
+        cout << "What is the number of this account? The format should be 000-000-000000 : ";
+        string account_number;
+        cin >> account_number;
+        cout << "This account\'s number is "<<account_number<<"\n";
+        // cash input
+        cout << "How much money would this account have? Only integer is allowed : ";
+        long long balance;
+        cin >> balance;
+        cout << "This account will have " << balance << " won\n";
+        // input
+        Account_list.push_back(new Account(Bank_list[bank_index], user_name, account_number, balance));
+        for(int i = 0; i<User_list.size(); i++){
+            if(user_name == User_list[i]->get_user_name()) User_list[i]->attach(Account_list[index-1]);
+        }
+        index++;
+        cout<<"---------------------------";
+        cout<<'\n';
+    }
+    cout << "\n\n";
+    // print Account
+    for(int i = 0; i<Account_list.size(); i++){
+        Account* tmp_account(Account_list[i]);
+        cout<<"-------------"<<i+1<<"th ATM info-------------\n";
+        cout<<"|Bank: "<<tmp_account->get_Bank_name()<<"\n";
+        cout<<"|user name: "<<tmp_account->get_user_name()<<"\n";
+        cout<<"|Account number: "<<tmp_account->get_account_number()<<'\n';
+        cout<<"|Available Funds: KRW "<<tmp_account->get_cash()<<"\n";
+        cout<<"--------------------------------------\n";
+        cout<<'\n';
+    }
+    // ATM
+    cout << "Process 04 : Initializing ATM Information" << '\n';
+    cout << "This is ATM input section. If you're done, input 0" << '\n';
+    index = 1;
     while(1){
         cout<<"-----"<<index<<"th ATM input-----\n";
         //language_option(Unilingual/Bilingual) input
@@ -322,97 +378,6 @@ void Initial_Condition_Input(){
         cout<<'\n';
     }
     cout<<"\n\n";
-    //User input
-    cout<<"This is User input session. If you're done, input 0 or \"zero\"\n";
-    index = 1;
-    while(1){
-        cout<<"-----"<<index<<"th user input-----\n";
-        cout<<"Input the user name: ";
-        string name;
-        cin>>name;
-        if(name=="0" || name=="zero"){
-            break;
-        }
-        User_list.push_back(new User(name));
-        index++;
-        cout<<"---------------------------";
-        cout<<'\n';
-    }
-    cout<<"\n\n";
-    //Account input
-    cout<<"This is Account input session. If you're done, input 0 or \"zero\"\n";
-    index = 1;
-    while(1){
-        cout<<"-----"<<index<<"th account input-----\n";
-        cout<<"Current banks list:\n";
-        for(int i = 0; i<Bank_list.size(); i++){
-            cout<<Bank_list[i]->get_bank_name();
-            cout<<"\n";
-        }
-        cout<<"Which Bank does this account use? : ";
-        string bank_name;
-        cin>>bank_name;
-        if(bank_name=="0" || bank_name == "zero"){
-            break;
-        }
-        int bank_index = -1;
-        try
-        {
-            for(int i = 0; i<Bank_list.size(); i++){
-                if(Bank_list[i]->get_bank_name() == bank_name){
-                    bank_index = i;
-                    break;
-                }
-            }
-            if(bank_index==-1){
-                throw bank_name;
-            }
-        }
-        catch(string x)
-        {
-            cout<<"There is no such bank \""<<x<<"\"\n\n";
-            continue;
-        }
-        cout<<"You chose "<<bank_name<<'\n';
-        //user name input
-        cout<<"What is the user\'s name of this account?: ";
-        string user_name;
-        cin>>user_name;
-        cout<<"This account\'s user name is "<<user_name<<'\n';
-        //account number input
-        cout<<"What is the number of this account? The format should be 000-000-000000 : ";
-        string account_number;
-        cin>>account_number;
-        cout<<"This account\'s number is "<<account_number<<"\n";
-        // cash input
-        cout<<"How much money would this account have? Only integer is allowed : ";
-        long long cash;
-        cin>>cash;
-        cout<<"This account will have "<<cash<<" won\n";
-        //input
-        Account_list.push_back(new Account(Bank_list[bank_index],user_name, account_number, cash));
-        for(int i = 0; i<User_list.size(); i++){
-            if(user_name == User_list[i]->get_user_name()){
-                User_list[i]->attach(Account_list[index-1]);
-            }
-        }
-        index++;
-        cout<<"---------------------------";
-        cout<<'\n';
-    }
-    cout<<"\n\n";
-    //print Account
-    for(int i = 0; i<Account_list.size(); i++){
-        Account* tmp_account(Account_list[i]);
-        cout<<"-------------"<<i+1<<"th ATM info-------------\n";
-        cout<<"|Bank: "<<tmp_account->get_Bank_name()<<"\n";
-        cout<<"|user name: "<<tmp_account->get_user_name()<<"\n";
-        cout<<"|Account number: "<<tmp_account->get_account_number()<<'\n';
-        cout<<"|Available Funds: KRW "<<tmp_account->get_cash()<<"\n";
-        cout<<"--------------------------------------\n";
-        cout<<'\n';
-    }
-
 }
 
 int before_session(){
@@ -450,7 +415,7 @@ void display_everything(){
 
 int main(){
     //Bank input
-    Initial_Condition_Input();
+    Set_Initial_Condition();
     while(1){
         int ATM_index = before_session()-1;
         ATM* this_ATM = ATM_list[ATM_index];
