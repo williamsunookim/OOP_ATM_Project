@@ -7,8 +7,8 @@ destructor
 
 initial condition input 등 함수 지우기 (나중에)
 
-0. System Initialization
-    0-1. Bank information Initialization
+0. System Initialization						--> DONE
+    0-1. Bank information Initialization		
 	0-2. User information Initialization
 	0-3. Account information Initialization
 	0-4. ATM information Initialization
