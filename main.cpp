@@ -11,6 +11,7 @@ class Account;
 class Card;
 class ATM;
 class Bank;
+class User;
 
 
 //Classes declaration
@@ -42,7 +43,7 @@ public:
     Bank(string name);
     string get_bank_name();
     int find_index_of_Account(string Account_number);
-    Account* Bank::get_account_by_index(int index);
+    Account* get_account_by_index(int index);
 };
 Bank::Bank(string name) : FinancialEntity(name){
     bank_name = name;
@@ -52,6 +53,45 @@ string Bank::get_bank_name(){
 }
 Account* Bank::get_account_by_index(int index){
     return Account_list_of_Bank[index];
+}
+//one Account, one Bank
+//#############
+//###Account###
+//#############
+class Account : public FinancialEntity{
+private:
+    Bank* bank;
+    string NameofUser;
+    string NumofAccount;
+    long long AmountofCash;
+    string password;
+
+public:
+    Account(Bank* aBank , string user_name, string account_number, long long cash, string inputted_password);
+    Bank* get_Bank();
+    string get_Bank_name();
+    string get_user_name();
+    string get_account_number();
+    long long get_cash();
+};
+Account::Account(Bank* aBank, string user_name, string account_number, long long cash, string inputted_password) : FinancialEntity(aBank->get_bank_name()){
+    bank = aBank;
+    NameofUser = user_name;
+    NumofAccount = account_number;
+    AmountofCash = cash;
+    password = inputted_password;
+}
+Bank* Account::get_Bank(){
+    return bank;
+}
+string Account::get_user_name(){
+    return NameofUser;
+}
+long long Account::get_cash(){
+    return AmountofCash;
+}
+string Account::get_account_number(){
+    return NumofAccount;
 }
 int Bank::find_index_of_Account(string Account_number){
     for(int i = 0; i<Account_list_of_Bank.size(); i++){
@@ -86,45 +126,6 @@ string User::get_user_name(){
     return NameofUser;
 }
 
-//one Account, one Bank
-//#############
-//###Account###
-//#############
-class Account : public FinancialEntity{
-private:
-    Bank* bank;
-    string NameofUser;
-    string NumofAccount;
-    long long AmountofCash;
-    string password;
-
-public:
-    Account(Bank* aBank , string user_name, string account_number, long long cash, string inputted_password);
-    Bank* get_Bank();
-    string get_Bank_name();
-    string get_user_name();
-    string get_account_number();
-    long long get_cash();
-};
-Account::Account(Bank* aBank, string user_name, string account_number, long long cash, string inputted_password) : FinancialEntity(aBank->get_bank_name()){
-    bank = aBank;
-    NameofUser = user_name;
-    NumofAccount = account_number;
-    AmountofCash = cash;
-    password = inputted_password;
-}
-Bank* Account::get_Bank(){
-    return bank;
-}
-string Account::get_user_name(){
-    return NameofUser;
-}
-string Account::get_account_number(){
-    return NumofAccount;
-}
-long long Account::get_cash(){
-    return AmountofCash;
-}
 
 //#############
 //####Card#####
@@ -298,7 +299,6 @@ void Set_Initial_Condition(){
         cout<<'\n';
     }
     cout << "\n\n";
-
     // ACCOUNT
     cout << "Process 03 : Initializing Account Information" << '\n';
     cout << "Give the account's information. If you're done, input 0" << '\n';
