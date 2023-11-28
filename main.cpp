@@ -195,7 +195,7 @@ bool ATM::get_language(){
     return IsEnglish;
 }
 bool ATM::get_ATM_type(){
-    return isSingle;
+    return isSingle;  
 }
 string ATM::get_bank_name(){
     return this->bank->get_bank_name();
