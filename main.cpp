@@ -154,7 +154,7 @@ private:
     int AmountOfCash[4]; // 1000원, 5000원, 10000원, 50000원
 
     //ATM 호출 때 선언되는 변수들
-    int language_type; // 1이면 영어, 2이면 한국어 (REQ 1.3)
+    bool IsEnglish; // 1이면 영어, 2이면 한국어 (REQ 1.3)
 
 
 public:
@@ -192,9 +192,7 @@ bool ATM::get_language_option(){
     return isbilingual;
 }
 bool ATM::get_language(){
-    if(!isbilingual) return true; // unilingual이면 영어만 지원함
-    if(language_type == 1) return true;
-    else if(language_type == 2) return false;
+    return IsEnglish;
 }
 bool ATM::get_ATM_type(){
     return isSingle;
@@ -424,7 +422,7 @@ int before_session(){
     cout<<"-------------------------------------------\n";
     cout<<"\n";
     for(int i = 0; i<ATM_list.size(); i++){
-        string language_type = ATM_list[i]->get_language_option() ? "Single" : "Multiple";
+        string language_type = ATM_list[i]->get_ATM_type() ? "Single" : "Multiple";
         cout<<i+1<<". ATM "<<i+1<<" ("<<ATM_list[i]->get_bank_name()<<", "<<language_type<<")";
         cout<<'\n';
     }
@@ -462,7 +460,17 @@ int main(){
         cout<<"This is ATM "<<ATM_index+1<<" session. Whenever you want to exit a session, please input \"exit\"";
         string x;
         cin>>x;
-        if(x=="exit") break;
+        bool IsEnglish = true;
+        if(this_ATM->get_ATM_type()){
+            cout<<"Which do you prefer, Engilsh or Korean? If you prefer Engilsh, input 1 if not, input 0 ";
+            cin>>IsEnglish;
+        }
+        if(IsEnglish){ // 영어일 때
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+        }
+        else{ // 한국어일 때
+            // some code
+        }
     }
     display_everything();
 
