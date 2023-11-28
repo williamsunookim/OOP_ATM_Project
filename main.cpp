@@ -244,7 +244,6 @@ vector<Account*> Account_list;
 vector<User*> User_list;
 
 void Set_Initial_Condition(){
-    cout << "Please Insert Card" << '\n';
     cout << "Write down the Bank's name. If you're done, input 0" << '\n';
     while(1){
         string bank_name;
@@ -277,11 +276,11 @@ void Set_Initial_Condition(){
         cout << "-----" << index << "th account input-----" << '\n';
         cout << "Select the Bank the account belongs to. Here are the options of the banks." << '\n';
         for(int i = 0; i<Bank_list.size(); i++){
-            cout << "[" << i << "]" << Bank_list[i]->get_bank_name() << "Bank" << '\n';
+            cout << "[" << i << "] " << Bank_list[i]->get_bank_name() << '\n';
         }
         int bank_index;
         cin >> bank_index;
-        cout << Bank_list[bank_index]->get_bank_name() << "Bank Selected" << '\n';
+        cout << Bank_list[bank_index]->get_bank_name() << " Selected" << '\n';
         //user name input
         cout << "User\'s name of the account : ";
         string user_name;
