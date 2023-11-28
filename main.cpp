@@ -29,6 +29,25 @@ public:
 string FinancialEntity::get_name(){
     return name;
 }
+//#############
+//####Bank#####
+//#############
+class Bank : public FinancialEntity{
+private:
+    vector<Account*> Account_list;
+    string bank_name;
+
+public:
+    Bank(string name);
+    string get_bank_name();
+};
+
+Bank::Bank(string name) : FinancialEntity(name){
+    bank_name = name;
+}
+string Bank::get_bank_name(){
+    return bank_name;
+}
 
 //##############
 //#####User#####
@@ -69,7 +88,6 @@ public:
     string get_Bank_name();
     string get_user_name();
     string get_account_number();
-    string get_Bank_name();
     long long get_cash();
 };
 Account::Account(Bank* aBank, string user_name, string account_number, long long cash) : FinancialEntity(aBank->get_bank_name()){
@@ -105,29 +123,9 @@ string Card::get_card_number(){
     return CardNum;
 }
 
-//#############
-//####Bank#####
-//#############
-class Bank : public FinancialEntity{
-private:
-    vector<Account*> Account_list;
-    string bank_name;
-
-public:
-    Bank(string name);
-    string get_bank_name();
-};
-
-Bank::Bank(string name) : FinancialEntity(name){
-    bank_name = name;
-}
-string Bank::get_bank_name(){
-    return name;
-}
 string Account::get_Bank_name(){
     return name;
 }
-
 
 //#############
 //#####ATM#####
@@ -168,6 +166,7 @@ public:
     string get_bank_name();
     string get_unique_number();
     void get_cash();
+    long long get_total_cash();
 
 };
 
@@ -212,6 +211,10 @@ void ATM::get_cash(){
     cout<<"10000 won: "<<AmountOfCash[2]<<'\n';
     cout<<"50000 won: "<<AmountOfCash[3]<<'\n';
 }
+long long ATM::get_total_cash(){
+    return AmountOfCash[0]*1000 + AmountOfCash[1] * 5000 + AmountOfCash[2] * 10000 + AmountOfCash[3] * 50000;
+}
+
 
 vector<Bank*> Bank_list;
 vector<ATM*> ATM_list;
@@ -417,15 +420,51 @@ void Initial_Condition_Input(){
 
 }
 
-void main_session(){
+int before_session(){
+    cout<<"-------------------------------------------\n";
+    cout<<"\n";
+    for(int i = 0; i<ATM_list.size(); i++){
+        string language_type = ATM_list[i]->get_language_option() ? "Single" : "Multiple";
+        cout<<i+1<<". ATM "<<i+1<<" ("<<ATM_list[i]->get_bank_name()<<", "<<language_type<<")";
+        cout<<'\n';
+    }
+    cout<<"Choose the ATM which you will use. Input a number : ";
+    int index;
+    cin>>index;
+    
+    return index;
 
 }
 
+void display_everything(){
+    int i;
+    cout<<"----------------------------\nAll ATMs\' information: Remaining cash";
+    for(i = 0; i<ATM_list.size(); i++){
+        cout<<"ATM [SN: "<<ATM_list[i]->get_unique_number()<<"] remaining cash: "<<ATM_list[i]->get_total_cash();
+        cout<<'\n';
+    }
+    cout<<"\n";
+    cout<<"----------------------------\nAll accounts\' information: Remaining balance\n";
+    for(i = 0; i<Account_list.size();i++){
+        Account* tmp = Account_list[i];
+        cout<<"Account [Bank: "<<tmp->get_Bank_name()<<", No: "<<tmp->get_account_number()<<", Owner: "<<tmp->get_user_name()<<"] balance: "<<tmp->get_cash();
+        cout<<'\n';
+    }
+    cout<<"\n";
+}
+
 int main(){
-    // test case: Daegu, Kookmin, Woori, ShinHan, NonghHyup
     //Bank input
     Initial_Condition_Input();
-    main_session();
+    while(1){
+        int ATM_index = before_session()-1;
+        ATM* this_ATM = ATM_list[ATM_index];
+        cout<<"This is ATM "<<ATM_index+1<<" session. Whenever you want to exit a session, please input \"exit\"";
+        string x;
+        cin>>x;
+        if(x=="exit") break;
+    }
+    display_everything();
 
     return 0;
 }
