@@ -34,12 +34,13 @@ string FinancialEntity::get_name(){
 //#############
 class Bank : public FinancialEntity{
 private:
-    vector<Account*> Account_list;
+    vector<Account*> Account_list_of_Bank;
     string bank_name;
 
 public:
     Bank(string name);
     string get_bank_name();
+    int find_index_of_Account(string Account_number);
 };
 
 Bank::Bank(string name) : FinancialEntity(name){
@@ -48,13 +49,22 @@ Bank::Bank(string name) : FinancialEntity(name){
 string Bank::get_bank_name(){
     return bank_name;
 }
+int Bank::find_index_of_Account(string Account_number){
+    for(int i = 0; i<Account_list_of_Bank.size(); i++){
+        if(Account_list_of_Bank[i]->get_account_number() == Account_number){
+            return i;
+        }
+    }
+    return -1;
+}
+
 
 //##############
 //#####User#####
 //##############
 class User{
 private:
-    vector<Account*> Account_list;
+    vector<Account*> Account_list_of_User;
     vector<string> Transaction_history;
     string NameofUser;
 public:
@@ -66,7 +76,7 @@ User::User(string name){
     NameofUser = name;
 }
 void User::attach(Account* account){
-    Account_list.push_back(account);
+    Account_list_of_User.push_back(account);
 }
 string User::get_user_name(){
     return NameofUser;
@@ -143,6 +153,8 @@ private:
     string unique_number = ""; // ATM마다 다른 고유 식별 번호, 6자리  
     string transaction_history = ""; //거래 내역을 담는 곳
 
+    string admin_card_number = "";
+
     const int NonPrimaryDepositFee = 1000; //다른 은행 예금 수수료 (REQ 1.8)
     const int PrimaryWithdrawalFee = 1000; //같은 은행 출금 수수료 (REQ 1.8)
     const int NonPrimaryWithDrawalFee = 2000; //다른 은행 출금 수수료 (REQ 1.8)
@@ -167,7 +179,8 @@ public:
     string get_unique_number();
     void get_cash();
     long long get_total_cash();
-
+    Bank* get_bank();
+    string get_admin_card_number();
 };
 
 int ATM::order_number = 0;
@@ -212,6 +225,12 @@ void ATM::get_cash(){
 long long ATM::get_total_cash(){
     return AmountOfCash[0]*1000 + AmountOfCash[1] * 5000 + AmountOfCash[2] * 10000 + AmountOfCash[3] * 50000;
 }
+Bank* ATM::get_bank(){
+    return bank;
+}
+string ATM::get_admin_card_number(){
+    return admin_card_number;
+}
 
 
 vector<Bank*> Bank_list;
@@ -220,7 +239,6 @@ vector<Account*> Account_list;
 vector<User*> User_list;
 
 void Initial_Condition_Input(){
-    cout << "Please Insert Card" << '\n';
     cout << "Write down the Bank's name. If you're done, input 0 or \"zero\"\n";
     // 은행별로 번호 주고 선택하라고 하는 게 낫지 않나?
     while(1){
@@ -466,7 +484,22 @@ int main(){
             cin>>IsEnglish;
         }
         if(IsEnglish){ // 영어일 때
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+            while(1){ // transaction이 여러번 일어날 수 있기 때문
+                cout<<"Input your card: ";
+                string card_num;
+                cin>>card_num;
+                if(card_num==this_ATM->get_admin_card_number()){
+                    //activate admin mode
+                }
+                else if(this_ATM->get_bank()->find_index_of_Account(card_num) == -1){
+                    cout<<"Invalid Card\n";
+                }
+                else{
+                    // normal ATM session start
+
+
+                }
+            }
         }
         else{ // 한국어일 때
             // some code
