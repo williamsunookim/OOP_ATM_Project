@@ -194,6 +194,8 @@ public:
     const int LimitofCash = 50;
     const int LimitofCheck = 30;
 
+    const int once_withdrawal_limit = 500000;
+
     bool get_language_option();
     bool get_language(); // true면 영어라는 뜻, false면 한국어라는 뜻
     bool get_ATM_type(); // isSinlge을 반환
@@ -516,6 +518,7 @@ void Session(bool* IsFinished){
             string card_num;
             cin >> card_num;
             int index_of_Account = this_ATM->get_bank()->find_index_of_Account(card_num);
+            int withdrawal_count = 0;
             if(card_num==this_ATM->get_admin_card_number()){
                 //activate admin mode
             }
@@ -624,7 +627,13 @@ void Session(bool* IsFinished){
                     
                 }
                 else if(transaction_number==2){ // withdrawal
-
+                    cout << "You chose withdrawal.\n";
+                    withdrawal_count++;
+                    if(withdrawal_count==4){
+                        cout<<"Four withdrawal in one session is not allowed.\n";
+                        cout<<"Session aborted\n";
+                        return;
+                    }
                 }
                 else if(transaction_number==3){ //transfer
 
