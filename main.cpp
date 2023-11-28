@@ -244,8 +244,7 @@ vector<User*> User_list;
 
 void Set_Initial_Condition(){
     cout << "Please Insert Card" << '\n';
-    cout << "Write down the Bank's name. If you're done, input 0 or \"zero\"\n";
-    // 은행별로 번호 주고 선택하라고 하는 게 낫지 않나?
+    cout << "Write down the Bank's name. If you're done, input 0" << '\n';
     while(1){
         string bank_name;
         cin >> bank_name;
@@ -260,6 +259,167 @@ void Set_Initial_Condition(){
     while(1){
         cout << "-----" << index << "th user input-----" << '\n';
         cout << "User's name : ";
+<<<<<<< Updated upstream
+=======
+        string name;
+        cin >> name;
+        if(name == "0") break;
+        User_list.push_back(new User(name));
+        index++;
+        cout<<"---------------------------";
+        cout<<'\n';
+    }
+    cout << "\n\n";
+    // ACCOUNT
+    cout << "Process 03 : Initializing Account Information" << '\n';
+    cout << "Give the account's information. If you're done, input 0" << '\n';
+    index = 1;
+    while(1){
+        cout << "-----" << index << "th account input-----" << '\n';
+        cout << "Select the Bank the account belongs to. Here are the options of the banks." << '\n';
+        for(int i = 0; i<Bank_list.size(); i++){
+            cout << "[" << i << "]" << Bank_list[i]->get_bank_name() << "Bank" << '\n';
+        }
+        int bank_index;
+        cin >> bank_index;
+        cout << Bank_list[bank_index]->get_bank_name() << "Bank Selected" << '\n';
+        //user name input
+        cout << "User\'s name of the account : ";
+        string user_name;
+        cin >> user_name;
+        cout << "This account\'s user name is " << user_name << '\n';
+        //account number input
+        cout << "What is the number of this account? The format should be 000-000-000000 : ";
+        string account_number;
+        cin >> account_number;
+        cout << "This account\'s number is "<<account_number<<"\n";
+        // cash input
+        cout << "How much money would this account have? Only integer is allowed : ";
+        long long balance;
+        cin >> balance;
+        cout << "This account will have " << balance << " won\n";
+        // input
+        Account_list.push_back(new Account(Bank_list[bank_index], user_name, account_number, balance));
+        for(int i = 0; i<User_list.size(); i++){
+            if(user_name == User_list[i]->get_user_name()) User_list[i]->attach(Account_list[index-1]);
+        }
+        index++;
+        cout<<"---------------------------";
+        cout<<'\n';
+    }
+    cout << "\n\n";
+    // print Account
+    for(int i = 0; i<Account_list.size(); i++){
+        Account* tmp_account(Account_list[i]);
+        cout<<"-------------"<<i+1<<"th ATM info-------------\n";
+        cout<<"|Bank: "<<tmp_account->get_Bank_name()<<"\n";
+        cout<<"|user name: "<<tmp_account->get_user_name()<<"\n";
+        cout<<"|Account number: "<<tmp_account->get_account_number()<<'\n';
+        cout<<"|Available Funds: KRW "<<tmp_account->get_cash()<<"\n";
+        cout<<"--------------------------------------\n";
+        cout<<'\n';
+    }
+    // ATM
+    cout << "Process 04 : Initializing ATM Information" << '\n';
+    cout << "This is ATM input section. If you're done, input 0" << '\n';
+    index = 1;
+    while(1){
+        cout << "-----" << index << "th ATM input-----" << '\n';
+        //language_option(Unilingual/Bilingual) input
+        cout << "Select the ATM language option. Bilingual[Y] / Unilingual[N] : ";
+        string language_option;
+        bool IsBilingual;
+        while(1){
+            cin >> language_option;
+            if(language_option == "Y") IsBilingual = true;
+            else if(language_option == "N") IsBilingual = false;
+            else cout << "Wrong Input. Please try again : ";
+        }
+        cout << "This ATM will be "<< ((IsBilingual) ? "Bilingual" : "Unilingual") <<'\n';
+        //Bank input
+        cout << "Select the Primary Bank that the ATM will be using. Here are the options of the banks.";
+        for(int i = 0; i<Bank_list.size(); i++){
+            cout << "[" << i << "]" << Bank_list[i]->get_bank_name() << "Bank" << '\n';
+        }
+        int bank_index;
+        cin >> bank_index;
+        cout<<"Current banks list:\n";
+        for(int i = 0; i<Bank_list.size(); i++){
+            cout<<Bank_list[i]->get_bank_name();
+            cout<<"\n";
+        }
+        cout<<"Which Bank does this ATM use? ";
+        string bank_name;
+        int bank_index = -1;
+        try
+        {
+            cin>>bank_name;
+            for(int i = 0; i<Bank_list.size(); i++){
+                if(Bank_list[i]->get_bank_name() == bank_name){
+                    bank_index = i;
+                    break;
+                }
+            }
+            if(bank_index==-1){
+                throw bank_name;
+            }
+        }
+        catch(string x)
+        {
+            cout<<"There is no such bank \""<<x<<"\"\n\n";
+            continue;
+        }
+        
+        
+        cout<<"You chose "<<bank_name<<'\n';
+        //bank_type(Single/Multiple) input
+        cout<<"ATM type(Single/Multiple): ";
+        string bank_type;
+        cin>>bank_type;
+        bool IsSingle;
+        if(bank_type[0] == 'S' || bank_type[0] == 's') IsSingle = true;
+        else IsSingle = false;
+        cout<<"This ATM will be "<<bank_type<<'\n';
+        //cash input
+        int arr[4] = {1000, 5000, 10000, 50000};
+        vector<int> cash;
+        for(int i = 0; i< 4; i++){
+            cout<<"How much "<<arr[i]<<" won cash will this ATM have: ";
+            int NumofCash;
+            cin>>NumofCash;
+            cash.push_back(NumofCash);
+        }
+        // input
+        ATM_list.push_back(new ATM(IsBilingual, Bank_list[bank_index], IsSingle, cash));
+        //cash info
+        cout<<"Current cash amount of this ATM:"<<'\n';
+        ATM_list[index-1]->get_cash();
+        index++;
+        cout<<"-----------------------";
+        cout<<'\n';
+    }
+    cout<<"\n\n";
+    //print ATM
+    for(int i = 0; i<ATM_list.size(); i++){
+        ATM* tmp_atm(ATM_list[i]);
+        cout<<"-------------"<<i+1<<"th ATM info-------------\n";
+        cout<<"|Bank: "<<tmp_atm->get_bank_name()<<"\n";
+        cout<<"|ATM Language Option: "<<((tmp_atm->get_language_option())?"Bilingual":"Unilingual")<<"\n";
+        cout<<"|ATM type: "<<((tmp_atm->get_ATM_type()) ? "Single" : "Multiple")<<"\n";
+        cout<<"|ATM unique number: "<<tmp_atm->get_unique_number()<<"\n";
+        cout<<"|Remaining cash: \n";
+        tmp_atm->get_cash();
+        cout<<"--------------------------------------\n";
+        cout<<'\n';
+    }
+    cout<<"\n\n";
+    //User input
+    cout<<"This is User input session. If you're done, input 0 or \"zero\"\n";
+    index = 1;
+    while(1){
+        cout<<"-----"<<index<<"th user input-----\n";
+        cout<<"Input the user name: ";
+>>>>>>> Stashed changes
         string name;
         cin >> name;
         if(name == "0") break;
