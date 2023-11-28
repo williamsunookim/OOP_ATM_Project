@@ -264,7 +264,6 @@ Fee::Fee(int non_primary_deposit, int primary_deposit, int primary_withdrawal, i
     this->CashTransferFee = cash_transfer;
 }
 
-// [7] = {"", "Kookmin", "Woori", "Hana", "Shinhan", "Nonghyeop", "Kakao"};
 vector<Bank*> Bank_list;
 vector<ATM*> ATM_list;
 vector<Account*> Account_list;
@@ -272,7 +271,7 @@ vector<User*> User_list;
 
 void Set_Initial_Condition(){
 
-    // BANK
+    // BANK --DONE--
     cout << "Process 01 : Initializing Bank Information" << '\n';
     cout << "Write down the Bank's name. If you're done, input 0" << '\n';
     while(1){
@@ -288,15 +287,12 @@ void Set_Initial_Condition(){
     cout << "Give the User's name. If you're done, input 0" << '\n';
     int index = 1;
     while(1){
-        cout << "-----" << index << "th user input-----" << '\n';
-        cout << "User's name : ";
+        cout << index << "th User's name : ";
         string name;
         cin >> name;
         if(name == "0") break;
         User_list.push_back(new User(name));
         index++;
-        cout<<"---------------------------";
-        cout<<'\n';
     }
     cout << "\n\n";
     // ACCOUNT
@@ -307,26 +303,24 @@ void Set_Initial_Condition(){
         cout << "-----" << index << "th account input-----" << '\n';
         cout << "Select the Bank the account belongs to. Here are the options of the banks." << '\n';
         for(int i = 0; i<Bank_list.size(); i++){
-            cout << "[" << i << "]" << Bank_list[i]->get_bank_name() << " Bank" << '\n';
+            cout << "[" << i << "] " << Bank_list[i]->get_bank_name() << " Bank" << '\n';
         }
+        cout << "[-1] End Input" << '\n';
         int bank_index;
         cin >> bank_index;
-        cout << Bank_list[bank_index]->get_bank_name() << "Bank Selected" << '\n';
+        if(bank_index == -1) break;
         //user name input
         cout << "User\'s name of the account : ";
         string user_name;
         cin >> user_name;
-        cout << "This account\'s user name is " << user_name << '\n';
         //account number input
         cout << "What is the number of this account? The format should be 000-000-000000 : ";
         string account_number;
         cin >> account_number;
-        cout << "This account\'s number is "<<account_number<<"\n";
         // cash input
         cout << "How much money would this account have? Only integer is allowed : ";
         long long balance;
         cin >> balance;
-        cout << "This account will have " << balance << " won\n";
         cout << "What is the account's password? (6 digits) : ";
         string password;
         cin >> password;
@@ -373,11 +367,11 @@ void Set_Initial_Condition(){
             else cout << "Wrong Input. Please try again : ";
         }
         if(language_option == "0") break;
-        cout << "This ATM will be "<< ((IsBilingual) ? "Bilingual" : "Unilingual") <<'\n';
+        cout << "This ATM will be "<< ((IsBilingual) ? "Bilingual" : "Unilingual") << '\n';
         //Bank input
-        cout << "Select the Primary Bank that the ATM will be using. Here are the options of the banks.";
+        cout << "Select the Primary Bank that the ATM will be using. Here are the options of the banks." << '\n';
         for(int i = 0; i<Bank_list.size(); i++){
-            cout << "[" << i << "]" << Bank_list[i]->get_bank_name() << "Bank" << '\n';
+            cout << "[" << i << "] " << Bank_list[i]->get_bank_name() << " Bank" << '\n';
         }
         int bank_index;
         cin >> bank_index;
@@ -388,11 +382,15 @@ void Set_Initial_Condition(){
         bool IsSingle;
         while(1){
             cin >> bank_type;
-            if(bank_type == "Y") IsSingle = false;
-            else if(bank_type == "N") IsSingle = true;
-            else cout << "Wrong Input. Please try again : ";
+            if(bank_type == "Y"){
+                IsSingle = false;
+                break;
+            }else if(bank_type == "N"){
+                IsSingle = true;
+                break;
+            }else cout << "Wrong Input. Please try again : ";
         }
-        cout << "This ATM will be using" << ((IsSingle) ? "Single Banks" : "Multiple Banks") << '\n';
+        cout << "This ATM will be using " << ((IsSingle) ? "Single Banks" : "Multiple Banks") << '\n';
         //cash input
         int arr[4] = {1000, 5000, 10000, 50000};
         int cash[4];
