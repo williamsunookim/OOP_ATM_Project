@@ -42,7 +42,6 @@ public:
     Bank(string name);
     string get_bank_name();
 };
-
 Bank::Bank(string name) : FinancialEntity(name){
     bank_name = name;
 }
@@ -123,7 +122,6 @@ public:
 string Card::get_card_number(){
     return CardNum;
 }
-
 string Account::get_Bank_name(){
     return name;
 }
@@ -131,7 +129,6 @@ string Account::get_Bank_name(){
 //#############
 //#####ATM#####
 //#############
-
 class ATM  : public FinancialEntity{
 private:
     //ATM 선언 때 선언되는 변수들
@@ -170,7 +167,6 @@ public:
     long long get_total_cash();
 
 };
-
 int ATM::order_number = 0;
 ATM::ATM(const bool language_option, Bank* bank_info, bool ATM_type, vector<int>& initial_cash) : FinancialEntity(bank_info->get_bank_name()){
     bank = bank_info;
@@ -214,14 +210,14 @@ long long ATM::get_total_cash(){
     return AmountOfCash[0]*1000 + AmountOfCash[1] * 5000 + AmountOfCash[2] * 10000 + AmountOfCash[3] * 50000;
 }
 
-
+string bank_names[6] = {"Kookmin", "Woori", "Hana", "Shinhan", "Nonghyeop", "Kakao"};
 vector<Bank*> Bank_list;
 vector<ATM*> ATM_list;
 vector<Account*> Account_list;
 vector<User*> User_list;
 
 void Initial_Condition_Input(){
-    cout << "Please Insert Card" << '\n';
+    cout << "Process : Initializing "
     cout << "Write down the Bank's name. If you're done, input 0 or \"zero\"\n";
     // 은행별로 번호 주고 선택하라고 하는 게 낫지 않나?
     while(1){
