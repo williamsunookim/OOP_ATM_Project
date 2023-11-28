@@ -8,6 +8,11 @@ destructor
 initial condition input 등 함수 지우기 (나중에)
 
 0. System Initialization
+    0-1. Bank information Initialization
+	0-2. User information Initialization
+	0-3. Account information Initialization
+	0-4. ATM information Initialization
+	0-5. Fee information Initialization
 1. ATM 선택(구현완료)
 2. 언어 선택(bilingual이라면)
 3. 카드 넣기 (예외처리 해야됨, 여기서 사람 인식 가능)
