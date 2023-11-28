@@ -166,7 +166,7 @@ public:
     void get_cash();
 };
 int ATM::order_number = 0;
-ATM::ATM(const bool language_option, Bank* bank_info, bool ATM_type, int &initial_cash){
+ATM::ATM(const bool language_option, Bank* bank_info, bool ATM_type, int initial_cash[]){
     bank = bank_info;
     order_number++;
     string front = to_string((int)bank->get_bank_name()[0]);
