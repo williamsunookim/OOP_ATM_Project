@@ -99,9 +99,7 @@ string Account::get_account_number(){
 }
 int Bank::find_index_of_Account(string Account_number){
     for(int i = 0; i<Account_list_of_Bank.size(); i++){
-        if(Account_list_of_Bank[i]->get_account_number() == Account_number){
-            return i;
-        }
+        if(Account_list_of_Bank[i]->get_account_number() == Account_number) return i;
     }
     return -1;
 }
@@ -306,6 +304,7 @@ vector<Bank*> Bank_list;
 vector<ATM*> ATM_list;
 vector<Account*> Account_list;
 vector<User*> User_list;
+map<string, Account*> Accounts_DB;
 
 void Set_Initial_Condition(){
 
@@ -363,7 +362,9 @@ void Set_Initial_Condition(){
         string password;
         cin >> password;
         // input
-        Account_list.push_back(new Account(Bank_list[bank_index], user_name, account_number, balance, password));
+        Account *account = new Account(Bank_list[bank_index], user_name, account_number, balance, password);
+        Accounts_DB[account_number] = account;
+        Account_list.push_back(account);
         for(int i = 0; i<User_list.size(); i++){
             if(user_name == User_list[i]->get_user_name()) User_list[i]->attach(Account_list[index-1]);
         }
@@ -471,17 +472,11 @@ void Set_Initial_Condition(){
 int before_session(){
     cout << "-------------------------------------------\n";
     cout << "\n";
-    for(int i = 0; i<ATM_list.size(); i++){
-        string language_type = ATM_list[i]->get_ATM_type() ? "Single" : "Multiple";
-        cout << i+1 << ". ATM " << i+1 << " ("<<ATM_list[i]->get_bank_name() << ", " << language_type<<")";
-        cout << '\n';
-    }
+    for(int i = 0; i<ATM_list.size(); i++) cout << "[" << i+1 << "] ATM " << i+1 << " ("<<ATM_list[i]->get_bank_name() << ", supporting " << (ATM_list[i]->get_ATM_type() ? "Single" : "Multiple") << " language)" << '\n';
     cout << "Choose the ATM which you will use. Input a number : ";
     int index;
     cin >> index;
-    
     return index;
-
 }
 
 void display_everything(){
@@ -500,107 +495,115 @@ void display_everything(){
     }
     cout << "\n";
 }
+
 int unique_indentifier = 0;
+bool IsEnglish = true;
+
+void print(int situation){
+    switch(situation){
+        case 1:
+            if(IsEnglish) cout << "Please Insert Your Card.\nCard Number : ";
+            else cout << "카드를 삽입해 주세요.\n카드 번호 : ";
+    }
+}
+
+void Deposit(){
+    return;
+}
+
 void Session(bool* IsFinished){
     int ATM_index = before_session()-1;
     ATM* this_ATM = ATM_list[ATM_index];
-    cout << "This is ATM " << ATM_index+1 << " session. Whenever you want to exit a session, please input \"exit\"";
+    cout << "This is ATM " << ATM_index+1 << " session. Whenever you want to exit a session, please input 0";
     string x;
     cin >> x;
-    bool IsEnglish = true;
     if(this_ATM->get_language_option()){
-        cout << "Which do you prefer, Engilsh or Korean? If you prefer Engilsh, input 1 if not, input 0 ";
-        cin >> IsEnglish;
+        cout << "Please Select a language.\n[0] EXIT\n[1] English\n[2] Korean" << '\n';
+        int k;
+        cin >> k;
+        if(k == 0) throw 1;
+        IsEnglish = (k == 1) ? true : false;
     }
-    if(IsEnglish){ // 영어일 때
-        while(1){ // transaction이 여러번 일어날 수 있기 때문
-            cout << "Input your card: ";
-            string card_num;
-            cin >> card_num;
-            int index_of_Account = this_ATM->get_bank()->find_index_of_Account(card_num);
-            int withdrawal_count = 0;
-            if(card_num==this_ATM->get_admin_card_number()){
-                //activate admin mode
+    while(1){       // transaction이 여러번 일어날 수 있기 때문
+        print(1);   // insert card
+        string card_num;
+        cin >> card_num;
+        int index_of_Account = this_ATM->get_bank()->find_index_of_Account(card_num);
+        int withdrawal_count = 0;
+        if(card_num == this_ATM->get_admin_card_number()){
+            //activate admin mode
+        }
+        else{
+            // If Invalid Card :
+            if(Accounts_DB.find(card_num) == Accounts_DB.end()) throw 2;
+            Account* this_account = Accounts_DB.at(card_num);
+            // If Bank doesn't match (case : ATM only supports single bank)
+            if(this_ATM->get_ATM_type() and this_ATM->get_bank_name() != this_account->get_Bank_name()) throw 3;
+            
+            // Normal ATM session start
+            int count_attempt=1;
+            while(count_attempt<=4){
+                if(count_attempt == 4){// 4번째 시도 이면
+                    cout << "Session aborted\n";
+                    cout << "Card returned\n";
+                    throw 4;
+                }
+                string inputted_password;
+                cout << "Please Enter Password : ";
+                cin >> inputted_password;
+                if(inputted_password != this_account->get_password()){
+                    cout << "Password Incorrect! Please try again (" << 3-count_attempt << " Attempts remaining)." << '\n';
+                    count_attempt++;
+                    continue;
+                }else break;
             }
-            else if(this_ATM->get_ATM_type() && index_of_Account == -1){
-                cout << "Invalid Card\n"; 
-                continue; // 다음 transaction
-            }
-            else{
-                // normal ATM session start
-                Account* this_account;
-                if(index_of_Account==-1){
-                    for(int i = 0; i<ATM_list.size(); i++){
-                        int tmp_index = ATM_list[i]->get_bank()->find_index_of_Account(card_num);
-                        if(tmp_index!=-1){
-                           this_account = ATM_list[i]->get_bank()->get_account_by_index(tmp_index); 
-                        }
-                    }
-                }
-                else{
-                    Account* this_account = this_ATM->get_bank()->get_account_by_index(index_of_Account);
-                }
-                for(int count_attempt = 1; count_attempt<=4; count_attempt++){
-                    if(count_attempt == 4){// 4번째 시도 이면
-                        cout << "Session aborted\n";
-                        cout << "Card returned\n";
-                        return;
-                    }
-                    string inputted_password;
-                    cout << "Enter Password: ";
-                    cin >> inputted_password;
-                    if(inputted_password != this_account->get_password()){
-                        cout << "Incorrect Password\n";
-                        count_attempt++;
-                        continue;
-                    }
-
-                }
-                cout << "User identified\n";
-                cout << "[1] Deposit\n";
-                cout << "[2] Withdrawal\n";
-                cout << "[3] Transfer\n";
-                cout << "[4] Exit\n";
-                cout << "What will you do? Input an integer number : ";
-                int transaction_number;
-                cin >> transaction_number;
-                if(transaction_number==1){
-                    
+            cout << "User identified!\nHow may I help you?\n";
+            cout << "[0] Exit\n";
+            cout << "[1] Deposit\n";
+            cout << "[2] Withdrawal\n";
+            cout << "[3] Transfer\n";
+            
+            int transaction_number;
+            cin >> transaction_number;
+            switch(transaction_number){
+                case 0:
+                    throw 1;
+                case 1:
+                {
                     cout << "You chose deposit\n";
                     int CountCash = 0;
                     int CountCheck = 0;
                     string local_history = "";
                     long long total_adding_cash = 0;
+                    cout << "Input either cash or money and the number of it (e.g., \"5000 2\", \"10000 3\") ";
+                    cout << "If you're done, input 0\n";
                     while(1){
-                        cout << "Input either cash or money and the number of it (e.g., \"5000 2\", \"10000 3\") ";
-                        cout << "If you're done, input 0\n";
-                        cout<<"Input: ";
                         long long money, NumofMoney;
-                        cin>>money;
+                        cin >> money;
                         if(money==0) break;
-                        cin>>NumofMoney;
-                        if(money>=100000){ // 수표일 때
+                        cin >> NumofMoney;
+                        if(money >= 100000){ // 수표일 때
                             CountCheck += NumofMoney;
-                            if(CountCheck>this_ATM->LimitofCheck){
-                                cout<<"The total amount of Check you gave : "<<CountCheck<<"\n";
-                                CountCheck-=NumofMoney;
+                            if(CountCheck > this_ATM->LimitofCheck){
+                                cout << "The total amount of Check you gave : " << CountCheck << "\n";
+                                CountCheck -= NumofMoney;
                                 continue;
                             }
                             if(this_ATM->get_bank_name() != this_account->get_Bank_name()){
                                 cout<<"The fee will be "<<this_ATM->NonPrimaryDepositFee<<"won\n";
                                 cout<<"Will you give fee? If yes, input 1. If no, input 0: ";
                                 bool Ispayed;
-                                cin>>Ispayed;
+                                cin >> Ispayed;
                                 if(!Ispayed){
                                     cout<<"Abort transaction\n";
-                                    break;
+                                    throw 5;
                                 }
                             }
                             
                             this_account->add_cash(money * NumofMoney);
                             total_adding_cash += money*NumofMoney;
                             this_ATM->add_cash(1000, 1);
-                           
+                            
                         }
                         else if (money==1000 || money==5000 || money==10000 || money==50000){
                             CountCash += NumofMoney;
@@ -624,9 +627,9 @@ void Session(bool* IsFinished){
                     local_history+=tmp;
                     this_ATM->add_history(local_history);
                     this_account->add_history(local_history);
-                    
                 }
-                else if(transaction_number==2){ // withdrawal
+                case 2:
+                    // withdrawal
                     cout << "You chose withdrawal.\n";
                     withdrawal_count++;
                     if(withdrawal_count==4){
@@ -634,34 +637,44 @@ void Session(bool* IsFinished){
                         cout<<"Session aborted\n";
                         return;
                     }
-                }
-                else if(transaction_number==3){ //transfer
-
-                }
-                else if(transaction_number==4){ //exit
-                    cout<<"Session aborted\n";
-                    return;
-                }
-                    
+                case 3:
+                    //transfer
+                default:
             }   
-        }
+        }   
     }
-    else{ // 한국어일 때
-        // some code
-    }
-    
 }
 
 int main(){
-    //Bank input
     Set_Initial_Condition();
-    bool IsFinished = false;
-    while(1){
-        Session(&IsFinished);
-        if(IsFinished) break;
+    try{
+        bool IsFinished = false;
+        while(1){
+            Session(&IsFinished);
+            if(IsFinished) break;
+        }
+        display_everything();
     }
-    display_everything();
-
+    catch(int error_code){
+        switch(error_code){
+            case 1:
+                // 메뉴 선택에서 종료 선택한 경우
+                cout << "Exited From Option Selection. Ending ATM Session." << '\n';
+                break;
+            case 2:
+                // Invalid한 카드 삽입한 경우
+                break;
+            case 3:
+                // Single Bank일 때, 카드 은행 불일치하는 경우
+                break;
+            case 4:
+                // 비밀번호 3회 이상 틀린 경우
+                break;
+            case 5:
+                // 수수료 안 내겠다고 선택한 경우
+                break;
+        }
+    }
     return 0;
 }
 
