@@ -7,46 +7,46 @@
 using namespace std;
 
 //Forward declaration
+class History;
 class Account;
 class Card;
 class ATM;
 class Bank;
 class User;
 
-
 //Classes declaration
 
-//#########################
-//#####FinancialEntity#####
-//#########################
-class FinancialEntity {
-protected:
-    string name;
-
-public:
-    FinancialEntity(string name) : name(name) {}
-    string get_name();
+class History{
+    private:
+        vector<string> transaction_history;
+    public:
+        void add_history(string transaction);
+        History();
+        ~History();
+        void show_history();
 };
-
-string FinancialEntity::get_name(){
-    return name;
+void History::add_history(string transaction){
+    transaction_history.push_back(transaction);
+}
+void History::show_history(){
+    for(auto line : transaction_history) cout << line << '\n';
 }
 //#############
 //####Bank#####
 //#############
-class Bank : public FinancialEntity{
+class Bank : public History{
 private:
     vector<Account*> Account_list_of_Bank;
     string bank_name;
-
 public:
     Bank(string name);
+    ~Bank();
     string get_bank_name();
     int find_index_of_Account(string Account_number);
     Account* get_account_by_index(int index);
 };
-Bank::Bank(string name) : FinancialEntity(name){
-    bank_name = name;
+Bank::Bank(string name){
+    this->bank_name = name;
 }
 string Bank::get_bank_name(){
     return bank_name;
@@ -58,17 +58,16 @@ Account* Bank::get_account_by_index(int index){
 //#############
 //###Account###
 //#############
-class Account : public FinancialEntity{
+class Account : public History{
 private:
     Bank* bank;
     string NameofUser;
     string NumofAccount;
     long long AmountofCash;
     string password;
-    string transaction_history = "";
-
 public:
     Account(Bank* aBank , string user_name, string account_number, long long cash, string inputted_password);
+    ~Account();
     Bank* get_Bank();
     string get_Bank_name();
     string get_user_name();
@@ -76,9 +75,8 @@ public:
     long long get_balance();
     string get_password();
     void add_cash(long long cash);
-    void add_history(string history);
 };
-Account::Account(Bank* aBank, string user_name, string account_number, long long cash, string inputted_password) : FinancialEntity(aBank->get_bank_name()){
+Account::Account(Bank* aBank, string user_name, string account_number, long long cash, string inputted_password){
     bank = aBank;
     NameofUser = user_name;
     NumofAccount = account_number;
@@ -97,27 +95,17 @@ long long Account::get_balance(){
 string Account::get_account_number(){
     return NumofAccount;
 }
-int Bank::find_index_of_Account(string Account_number){
-    for(int i = 0; i<Account_list_of_Bank.size(); i++){
-        if(Account_list_of_Bank[i]->get_account_number() == Account_number) return i;
-    }
-    return -1;
-}
 string Account::get_password(){
     return password;
 }
 void Account::add_cash(long long cash){
     AmountofCash+=cash;
 }
-void Account::add_history(string history){
-    transaction_history+=history;
-}
-
 
 //##############
 //#####User#####
 //##############
-class User{
+class User : public History{
 private:
     vector<Account*> Account_list_of_User;
     vector<string> Transaction_history;
@@ -137,11 +125,10 @@ string User::get_user_name(){
     return NameofUser;
 }
 
-
 //#############
 //####Card#####
 //#############
-class Card{
+class Card : public History{
 protected:
     string CardNum;
 public:
@@ -151,14 +138,11 @@ public:
 string Card::get_card_number(){
     return CardNum;
 }
-string Account::get_Bank_name(){
-    return name;
-}
 
 //#############
 //#####ATM#####
 //#############
-class ATM  : public FinancialEntity{
+class ATM  : public History{
 private:
     //ATM 선언 때 선언되는 변수들
     bool isbilingual; //isbilingual은 이 atm이 두 가지의 언어를 지원하는지 알려줌 -> false면 영어만 언어 지원 (REQ 1.3)
@@ -205,9 +189,10 @@ public:
     string get_admin_card_number();
     void add_cash(int money, int NumofMoney);
     void add_history(string history);
+    void show_history();
 };
 int ATM::order_number = 0;
-ATM::ATM(const bool language_option, Bank* bank_info, bool ATM_type, int initial_cash[], int admin_card_number) : FinancialEntity(bank_info->get_bank_name()){
+ATM::ATM(const bool language_option, Bank* bank_info, bool ATM_type, int initial_cash[], int admin_card_number){
     bank = bank_info;
     order_number++;
     string front = to_string((int)bank->get_bank_name()[0]);
@@ -260,9 +245,6 @@ void ATM::add_cash(int money, int NumofMoney){
     else if(money==5000) AmountOfCash[1] += NumofMoney;
     else if(money==10000) AmountOfCash[2] += NumofMoney;
     else if(money==50000) AmountOfCash[3] += NumofMoney;
-}
-void ATM::add_history(string history){
-    transaction_history += history;
 }
 
 int NonPrimaryDepositFee = 1000;            // 다른 은행 예금 수수료 (REQ 1.8)
@@ -534,8 +516,17 @@ void Session(bool* IsFinished){
         int index_of_Account = this_ATM->get_bank()->find_index_of_Account(card_num);
         int withdrawal_count = 0;
         if(card_num == this_ATM->get_admin_card_number()){
-            cout << "ADMIN MODE\n";
-            //activate admin mode
+            //  ADMIN MODE
+            cout << "------------ADMIN MODE------------\nPlease Select a Menu.";
+            cout << "[0] EXIT\n[1] Transaction History\n";
+            string x;
+            while(1){
+                cin >> x;
+                if(x == "0") return;
+                else if(x == "1") break;
+                else cout << "Wrong Input. Please try again : ";
+            }
+            this_ATM->show_history();
         }
         else{
             // If Invalid Card :
