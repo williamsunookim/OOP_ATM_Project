@@ -7,46 +7,46 @@
 using namespace std;
 
 //Forward declaration
-class History;
 class Account;
 class Card;
 class ATM;
 class Bank;
 class User;
 
+
 //Classes declaration
 
-class History{
-    private:
-        vector<string> transaction_history;
-    public:
-        void add_history(string transaction);
-        History();
-        ~History();
-        void show_history();
+//#########################
+//#####FinancialEntity#####
+//#########################
+class FinancialEntity {
+protected:
+    string name;
+
+public:
+    FinancialEntity(string name) : name(name) {}
+    string get_name();
 };
-void History::add_history(string transaction){
-    transaction_history.push_back(transaction);
-}
-void History::show_history(){
-    for(auto line : transaction_history) cout << line << '\n';
+
+string FinancialEntity::get_name(){
+    return name;
 }
 //#############
 //####Bank#####
 //#############
-class Bank : public History{
+class Bank : public FinancialEntity{
 private:
     vector<Account*> Account_list_of_Bank;
     string bank_name;
+
 public:
     Bank(string name);
-    ~Bank();
     string get_bank_name();
     int find_index_of_Account(string Account_number);
     Account* get_account_by_index(int index);
 };
-Bank::Bank(string name){
-    this->bank_name = name;
+Bank::Bank(string name) : FinancialEntity(name){
+    bank_name = name;
 }
 string Bank::get_bank_name(){
     return bank_name;
@@ -58,16 +58,17 @@ Account* Bank::get_account_by_index(int index){
 //#############
 //###Account###
 //#############
-class Account : public History{
+class Account : public FinancialEntity{
 private:
     Bank* bank;
     string NameofUser;
     string NumofAccount;
     long long AmountofCash;
     string password;
+    string transaction_history = "";
+
 public:
     Account(Bank* aBank , string user_name, string account_number, long long cash, string inputted_password);
-    ~Account();
     Bank* get_Bank();
     string get_Bank_name();
     string get_user_name();
@@ -75,8 +76,9 @@ public:
     long long get_balance();
     string get_password();
     void add_cash(long long cash);
+    void add_history(string history);
 };
-Account::Account(Bank* aBank, string user_name, string account_number, long long cash, string inputted_password){
+Account::Account(Bank* aBank, string user_name, string account_number, long long cash, string inputted_password) : FinancialEntity(aBank->get_bank_name()){
     bank = aBank;
     NameofUser = user_name;
     NumofAccount = account_number;
@@ -95,17 +97,27 @@ long long Account::get_balance(){
 string Account::get_account_number(){
     return NumofAccount;
 }
+int Bank::find_index_of_Account(string Account_number){
+    for(int i = 0; i<Account_list_of_Bank.size(); i++){
+        if(Account_list_of_Bank[i]->get_account_number() == Account_number) return i;
+    }
+    return -1;
+}
 string Account::get_password(){
     return password;
 }
 void Account::add_cash(long long cash){
     AmountofCash+=cash;
 }
+void Account::add_history(string history){
+    transaction_history+=history;
+}
+
 
 //##############
 //#####User#####
 //##############
-class User : public History{
+class User{
 private:
     vector<Account*> Account_list_of_User;
     vector<string> Transaction_history;
@@ -125,10 +137,11 @@ string User::get_user_name(){
     return NameofUser;
 }
 
+
 //#############
 //####Card#####
 //#############
-class Card : public History{
+class Card{
 protected:
     string CardNum;
 public:
@@ -138,11 +151,14 @@ public:
 string Card::get_card_number(){
     return CardNum;
 }
+string Account::get_Bank_name(){
+    return name;
+}
 
 //#############
 //#####ATM#####
 //#############
-class ATM  : public History{
+class ATM  : public FinancialEntity{
 private:
     //ATM 선언 때 선언되는 변수들
     bool isbilingual; //isbilingual은 이 atm이 두 가지의 언어를 지원하는지 알려줌 -> false면 영어만 언어 지원 (REQ 1.3)
@@ -189,10 +205,9 @@ public:
     string get_admin_card_number();
     void add_cash(int money, int NumofMoney);
     void add_history(string history);
-    void show_history();
 };
 int ATM::order_number = 0;
-ATM::ATM(const bool language_option, Bank* bank_info, bool ATM_type, int initial_cash[], int admin_card_number){
+ATM::ATM(const bool language_option, Bank* bank_info, bool ATM_type, int initial_cash[], int admin_card_number) : FinancialEntity(bank_info->get_bank_name()){
     bank = bank_info;
     order_number++;
     string front = to_string((int)bank->get_bank_name()[0]);
@@ -241,26 +256,56 @@ string ATM::get_admin_card_number(){
     return admin_card_number;
 }
 void ATM::add_cash(int money, int NumofMoney){
-    if(money==1000) AmountOfCash[0] += NumofMoney;
-    else if(money==5000) AmountOfCash[1] += NumofMoney;
-    else if(money==10000) AmountOfCash[2] += NumofMoney;
-    else if(money==50000) AmountOfCash[3] += NumofMoney;
+    if(money==1000){
+        AmountOfCash[0] += NumofMoney;
+    }
+    else if(money==5000){
+        AmountOfCash[1] += NumofMoney;
+    }
+    else if(money==10000){
+        AmountOfCash[2] += NumofMoney;
+    }
+    else if(money==50000){
+        AmountOfCash[3] += NumofMoney;
+    }
+}
+void ATM::add_history(string history){
+    transaction_history += history;
 }
 
-int NonPrimaryDepositFee = 1000;            // 다른 은행 예금 수수료 (REQ 1.8)
-int PrimaryDepositFee = 0;                  // 같은 은행 예금 수수료
-int PrimaryWithdrawalFee = 1000;            // 같은 은행 출금 수수료 (REQ 1.8)
-int NonPrimaryWithDrawalFee = 2000;         // 다른 은행 출금 수수료 (REQ 1.8)
-int PrimarytoPrimaryFee = 2000;             // 같은 은행끼리 송금 수수료 (REQ 1.8)
-int NonPrimarytoPrimaryFee = 3000;          // 같은, 다른 은행끼리 송금 수수료 (REQ 1.8)
-int NonPrimarytoNonPrimaryFee = 4000;       // 다른 은행끼리 송금 수수료 (REQ 1.8)
-int CashTransferFee = 5000;                 // 무통장 송금 수수료 (REQ 1.8)
+
+class Fee{
+public:
+    int NonPrimaryDepositFee;           // 다른 은행 예금 수수료 (REQ 1.8)
+    int PrimaryDepositFee;              // 같은 은행 예금 수수료
+    int PrimaryWithdrawalFee;           // 같은 은행 출금 수수료 (REQ 1.8)
+    int NonPrimaryWithDrawalFee;        // 다른 은행 출금 수수료 (REQ 1.8)
+    int PrimarytoPrimaryFee;            // 같은 은행끼리 송금 수수료 (REQ 1.8)
+    int NonPrimarytoPrimaryFee;         // 같은, 다른 은행끼리 송금 수수료 (REQ 1.8)
+    int NonPrimarytoNonPrimaryFee;      // 다른 은행끼리 송금 수수료 (REQ 1.8)
+    int CashTransferFee;                // 무통장 송금 수수료 (REQ 1.8)
+    Fee(){}
+    void initialize_fee(int non_primary_deposit, int primary_deposit, int primary_withdrawal, int non_primary_withdrawal,
+    int primary_transfer, int primary_to_non_transfer, int non_primary_transfer, int cash_transfer);   
+};
+void Fee::initialize_fee(int non_primary_deposit, int primary_deposit, int primary_withdrawal, int non_primary_withdrawal,
+    int primary_transfer, int primary_to_non_transfer, int non_primary_transfer, int cash_transfer){
+    this->NonPrimaryDepositFee = non_primary_deposit;
+    this->PrimaryDepositFee = primary_deposit;
+    this->PrimaryWithdrawalFee = primary_withdrawal;
+    this->NonPrimaryWithDrawalFee = non_primary_withdrawal;
+    this->PrimarytoPrimaryFee = primary_transfer;
+    this->NonPrimarytoPrimaryFee = primary_to_non_transfer;
+    this->NonPrimarytoNonPrimaryFee = non_primary_transfer;
+    this->CashTransferFee = cash_transfer;
+}
 
 vector<Bank*> Bank_list;
 vector<ATM*> ATM_list;
 vector<Account*> Account_list;
 vector<User*> User_list;
 map<string, Account*> Accounts_DB;
+Fee *fee = new Fee();
 
 void Set_Initial_Condition(){
 
@@ -421,6 +466,27 @@ void Set_Initial_Condition(){
         cout<<'\n';
     }
     cout<<"\n\n";
+
+    // FEE
+    cout << "Process 05 : Initializing Fee Information\n--------------------------------------\n";
+    int f1, f2, f3, f4, f5, f6, f7, f8;
+    cout << "Deposit fee for non-primary banks : ";
+    cin >> f1;
+    cout << "Deposit fee for primary banks : ";
+    cin >> f2;
+    cout << "Withdrawal fee for a primary bank : ";
+    cin >> f3;
+    cout << "Withdrawal fee for non-primary banks : ";
+    cin >> f4;
+    cout << "Account Transfer fee between primary banks : ";
+    cin >> f5;
+    cout << "Account Transfer fee between primary and non-primary banks : ";
+    cin >> f6;
+    cout << "Account Transfer fee between non-primary banks : ";
+    cin >> f7;
+    cout << "Cash Transfer fee to any banks : ";
+    cin >> f8;
+    fee->initialize_fee(f1, f2, f3, f4, f5, f6, f7, f8);
 }
 
 int before_session(){
@@ -461,31 +527,45 @@ void print(int situation){
     }
 }
 
-int Deposit(ATM *this_ATM){
+int Deposit(ATM *this_ATM, Account *this_account){
     int CountCash = 0;
     int CountCheck = 0;
-    long long tot_cash_deposited = 0;
+    int tot_cash_deposited = 0;
     long long total_adding_cash = 0;
     cout << "Input either cash or money and the number of it (e.g., \"5000 2\", \"10000 3\") ";
     cout << "If you're done, input 0\n";
     while(1){
         long long money, NumofMoney;
-        cin >> money >> NumofMoney;
+        cin >> money;
         if(money == 0) break;
+        cin >> NumofMoney;
         if(money >= 100000){ // 수표일 때
             CountCheck += NumofMoney;
             if(CountCheck > this_ATM->LimitofCheck){
                 cout << "The total amount of Check you gave : " << CountCheck << "\n";
-                throw 1006;
+                CountCheck -= NumofMoney;
+                continue;
             }
+            if(this_ATM->get_bank_name() != this_account->get_Bank_name()){
+                cout<<"The fee will be "<<this_ATM->NonPrimaryDepositFee<<"won\n";
+                cout<<"Will you give fee? If yes, input 1. If no, input 0: ";
+                bool Ispayed;
+                cin >> Ispayed;
+                if(!Ispayed){
+                    cout<<"Abort transaction\n";
+                    throw 5;
+                }
+            }
+            total_adding_cash += money*NumofMoney;
             //this_ATM->add_cash(total_adding_cash);
         }
         else if (money==1000 || money==5000 || money==10000 || money==50000){
             CountCash += NumofMoney;
             if(CountCash > this_ATM->LimitofCash){
                 cout << "The total amount of Cash you gave: "<< CountCash << "\n";
-                throw 1006;
+                throw 6;
             }
+            total_adding_cash+=money*NumofMoney;
             this_ATM->add_cash(money, NumofMoney);
         }
         else{
@@ -493,7 +573,6 @@ int Deposit(ATM *this_ATM){
             cout<<"\n\n";
             continue;
         }
-        total_adding_cash += money * NumofMoney;
     }
     return total_adding_cash;
 }
@@ -501,6 +580,7 @@ int Deposit(ATM *this_ATM){
 void Session(bool* IsFinished){
     int ATM_index = before_session()-1;
     ATM* this_ATM = ATM_list[ATM_index];
+    string session_total_history = "";
     cout << "This is ATM " << ATM_index+1 << " session. Whenever you want to exit a session, please input 0\n";
     if(this_ATM->get_language_option()){
         cout << "Please Select a language.\n[0] EXIT\n[1] English\n[2] Korean" << '\n';
@@ -516,17 +596,8 @@ void Session(bool* IsFinished){
         int index_of_Account = this_ATM->get_bank()->find_index_of_Account(card_num);
         int withdrawal_count = 0;
         if(card_num == this_ATM->get_admin_card_number()){
-            //  ADMIN MODE
-            cout << "------------ADMIN MODE------------\nPlease Select a Menu.";
-            cout << "[0] EXIT\n[1] Transaction History\n";
-            string x;
-            while(1){
-                cin >> x;
-                if(x == "0") return;
-                else if(x == "1") break;
-                else cout << "Wrong Input. Please try again : ";
-            }
-            this_ATM->show_history();
+            cout << "ADMIN MODE\n";
+            //activate admin mode
         }
         else{
             // If Invalid Card :
@@ -542,7 +613,7 @@ void Session(bool* IsFinished){
                 if(count_attempt == 4){// 4번째 시도 이면
                     cout << "Session aborted\n";
                     cout << "Card returned\n";
-                    throw 1004;
+                    throw 4;
                 }
                 string inputted_password;
                 cout << "Please Enter Password : ";
@@ -566,59 +637,104 @@ void Session(bool* IsFinished){
                 case 0:
                     *IsFinished = true;
                     return;
-                case 1:     // DEPOSIT
+                case 1:
                 {
                     cout << "You chose deposit\n";
-                    int total_adding_cash = Deposit(this_ATM);
-                    int deposit_fee = (is_primary_bank_account) ? (PrimaryDepositFee) : (NonPrimaryDepositFee);
-                    cout << "There is an deposit fee of " << CashTransferFee << " KRW. You have to deposit additional cash.\n";
-                    cout << "Will you continue?\n[0] NO\t[1] YES\n";
-                    int deposit_option;
+                    int total_adding_cash = Deposit(this_ATM, this_account);
+                    int deposit_fee = (is_primary_bank_account) ? (fee->PrimaryDepositFee) : (fee->NonPrimaryDepositFee);
+                    cout << "There is an deposit fee of " << deposit_fee << " KRW. The deposit fee will be deducted from the deposited amount.\n";
+                    cout << "Will you continue? [Y]/[N] : ";
+                    string deposit_option;
                     while(1){
                         cin >> deposit_option;
-                        if(deposit_option == 0) throw 1005;
-                        else if(deposit_option == 1){
+                        if(deposit_option == "N") throw 1005;
+                        else if(deposit_option == "Y"){
                             total_adding_cash -= deposit_fee;
                             break;
                         }
                         else cout << "Wrong Input. Please try again : ";
                     }
-                    int cash_transfer_fee = Deposit(this_ATM);
                     this_account->add_cash(total_adding_cash);
                     string local_history = "";
                     string tmp = ("[Transaction ID: " + to_string(++unique_indentifier) + "] Deposited " + to_string(total_adding_cash) + " won to Card[ID: "+ this_account->get_account_number()+"]");
                     local_history += tmp;
+                    session_total_history += tmp;
                     this_ATM->add_history(local_history);
                     this_account->add_history(local_history);
                     cout << total_adding_cash << " KRW is deposited to your account.\n";
                     cout << "your account's remaining balance is : " << this_account->get_balance() << " KRW\n";
                     break;
                 }
-                case 2:     // WITHDRAWAL
+                case 2:
                 {
+                    // withdrawal
+                    cout << "You chose withdrawal.\n";
+                    string local_history = "";
+                    withdrawal_count++;
+                    if(withdrawal_count==4){
+                        cout<<"Four withdrawal in one session is not allowed.\n";
+                        cout<<"Session aborted\n";
+                        cout << "All transactions: ";
+                        cout << session_total_history;
+                        return;
+                    }
+                    cout<<"How much money will you withdraw? ";
+                    long long withdrawalfund;
+                    cin>>withdrawalfund;
+
+                    if(withdrawalfund>this_account->get_cash()){ //계정에 돈 없을 때
+                        cout<<"No enough money in your account\n";
+                        withdrawal_count--;
+                        cout<<"transaction aborted\n";
+                        continue;
+                    }
+                    else if(withdrawalfund%1000!=0){ // 돈이 1000원 단위가 아닐 때
+                        cout<<"Invalid Fund\n";
+                        withdrawal_count--;
+                        cout<<"transaction aborted\n";
+                        continue;
+                    }
+                    int cash_50000 = withdrawalfund/50000;
+                    withdrawalfund %= 50000;
+                    int cash_10000 = withdrawalfund/10000;
+                    withdrawalfund %= 10000;
+                    int cash_5000 = withdrawalfund/5000;
+                    withdrawalfund%=5000;
+                    int cash_1000 = withdrawalfund/1000;
+                    int compare[4] = {cash_1000, cash_5000, cash_10000, cash_50000};
+                    for(int i = 0; i<this_ATM->get_cash_array())
+                    
+                    
                     cout << "You chose withdrawal.\n";
                     withdrawal_count++;
                     if(withdrawal_count==4){
-                        cout<<"Four withdrawals in one session is not allowed.\n";
+                        cout<<"Four withdrawal in one session is not allowed.\n";
                         cout<<"Session aborted\n";
+
                         throw 1007;
                     }
                     cout << "Please type the amount of cash to withdrawal : ";
-                    int withdrawal_cash_amount;
+                    long long withdrawal_cash_amount;
                     while(1){
                         cin >> withdrawal_cash_amount;
                         if(this_account->get_balance() < withdrawal_cash_amount) cout << "There's not enough balance in your account. Please try again : ";
                         else break;
                     }
                     // 수수료 출금
-                    int withdrawal_fee = (is_primary_bank_account) ? PrimaryWithdrawalFee : NonPrimaryWithDrawalFee;
+                    int withdrawal_fee = (is_primary_bank_account) ? fee->PrimaryWithdrawalFee : fee->NonPrimaryWithDrawalFee;
                     cout << "A withdrawal fee of " << withdrawal_fee << " KRW will be deposited from your account.\n";
                     cout << "Will you continue to withdrawal? [Y]/[N] : ";
                     string continue_option;
                     while(1){
                         cin >> continue_option;
-                        if(continue_option != "Y" and continue_option != "N") cout << "Wrong input. Please try again : ";
+                        if(continue_option != "Y" || continue_option != "N") cout << "Wrong input. Please try again : ";
                         else break;
+                    }
+                    if(continue_option=="Y"){
+
+                    }
+                    else{
+                        cout<<""
                     }
                     if(this_account->get_balance() < withdrawal_fee) throw 1008;
                     // 출금 옵션 선택
@@ -626,107 +742,15 @@ void Session(bool* IsFinished){
                     this_account->add_cash(-1*withdrawal_cash_amount);
                     string local_history = "";
                     string tmp = ("[Transaction ID: " + to_string(++unique_indentifier) + "] Withdrawes " + to_string(withdrawal_cash_amount) + " KRW from Account[ID: "+ this_account->get_account_number()+"]");
+                    session_total_history+=tmp;
                     local_history += tmp;
                     this_ATM->add_history(local_history);
                     this_account->add_history(local_history);
                     break;
                 }
-                case 3:     // TRANSFER
-                {   
-                    cout << "Please choose transfer type.\n[0] EXIT\n[1] Cash transfer\n[2] Account Transfer\n";
-                    int choice;
-                    while(1){
-                        cin >> choice;
-                        if(choice == 0) throw 1001;
-                        else if(choice == 1 or choice == 2) break;
-                        else cout << "Wrong Input. Please try again : ";
-                    }
-                    string destination;
-                    cout << "Please input the destination acount number(XXX-XXX-XXXXXX) : ";
-                    while(1){
-                        cin >> destination;
-                        if(Accounts_DB.find(destination) ==  Accounts_DB.end()) cout << "Not Existing Account. Please try again (enter 0 to exit) : ";
-                        else if(destination == this_account->get_account_number()) cout << "Can't Transfer to itself. Please try another : ";
-                        // else if(destination == "0") throw 1001;
-                        else break;
-                    }
-                    Account *destination_account = Accounts_DB.at(destination);
-                    cout << "transferring to " << destination << " [" << destination_account->get_Bank_name() << " Bank | Owner : " << destination_account->get_user_name() << "]\n";
-                    bool is_dest_primary_bank = (destination_account->get_Bank_name() == this_ATM->get_bank_name());
-                    int transfer_fee;
-                    switch(choice){
-                        case 1:
-                        {
-                            int inserted_cash = Deposit(this_ATM);
-                            transfer_fee = CashTransferFee;
-                            // 수수료 출금
-                            cout << "A transfer fee of " << transfer_fee << " KRW will be deposited from your account.\n";
-                            cout << "Will you continue to Transfer? [0] NO [1] YES : ";
-                            int continue_option;
-                            while(1){
-                                cin >> continue_option;
-                                if(continue_option == 1) break;
-                                else if(continue_option == 0) throw 1005;
-                                else cout << "Wrong input. Please try again : ";
-                            }
-                            cout << "Please deposit the transfer fee (" << transfer_fee << " KRW)\n";
-                            int deposited_fee = Deposit(this_ATM);
-                            if(deposited_fee != transfer_fee){
-                                cout << "Wrong amount deposited!\n";
-                                throw 1009;
-                            }
-                            if(this_account->get_balance() < transfer_fee) throw 1008;
-                            this_account->add_cash(-1*transfer_fee);
-                            destination_account->add_cash(inserted_cash);
-                            string local_history = "";
-                            string tmp = ("[Transaction ID: " + to_string(++unique_indentifier) + "] Transfers " + to_string(inserted_cash) + " KRW from Account[ID: "+ this_account->get_account_number()+"] to Account[ID: "+ destination_account->get_account_number() +"]");
-                            local_history += tmp;
-                            this_ATM->add_history(local_history);
-                            destination_account->add_history(local_history);
-                            break;
-                        }
-                        case 2:
-                        {
-                            if(is_primary_bank_account and is_dest_primary_bank) transfer_fee = NonPrimarytoPrimaryFee;
-                            else if(is_primary_bank_account or is_dest_primary_bank) transfer_fee = NonPrimarytoNonPrimaryFee;
-                            else transfer_fee = NonPrimarytoNonPrimaryFee;
-                            cout << "Input the source account number : ";
-                            string source_account_num;
-                            cin >> source_account_num;
-                            cout << "Input the amount of fund to be transferred : ";
-                            int transfer_amount;
-                            cin >> transfer_amount;
-                            if(transfer_amount > this_account->get_balance()){
-                                cout << "Not enough balance.\n";
-                                throw 1008;
-                            }
-                            cout << "A transfer fee of " << transfer_fee << " KRW will be deposited from your account.\n";
-                            cout << "Will you continue to Transfer? [0] NO [1] YES : ";
-                            int continue_option;
-                            while(1){
-                                cin >> continue_option;
-                                if(continue_option == 1) break;
-                                else if(continue_option == 0) throw 1005;
-                                else cout << "Wrong input. Please try again : ";
-                            }
-                            if(this_account->get_balance() < transfer_fee) throw 1008;
-                            this_account->add_cash(-1*transfer_fee);
-                            string local_history = ("[Transaction ID: " + to_string(++unique_indentifier) + "] Pays " + to_string(transfer_fee) + " KRW from Account[ID: "+ this_account->get_account_number()+"] for Transfer");
-                            this_account->add_history(local_history);
-                            this_ATM->add_history(local_history);
-                            this_account->add_cash(-1*transfer_amount);
-                            destination_account->add_cash(transfer_amount);
-                            local_history = ("[Transaction ID: " + to_string(++unique_indentifier) + "] Transfers " + to_string(transfer_amount) + " KRW from Account[ID: "+ this_account->get_account_number()+"] to Account[ID: "+ destination_account->get_account_number() +"]");
-                            this_ATM->add_history(local_history);
-                            this_account->add_history(local_history);
-                            destination_account->add_history(local_history);
-                            cout << "Transferred " << transfer_amount << " KRW to " << destination << " [" << destination_account->get_Bank_name() << " Bank | Owner : " << destination_account->get_user_name() << "]\n";
-                            cout << "Remaining Balance of My Account : " << this_account->get_balance() << " KRW\n\n";
-                            break;
-                        }
-                    }
+                case 3:
+                    //transfer
                     break;
-                }
                 default:
                     cout << "Wrong input. Please try again : ";
                     goto transaction_re_input;
@@ -748,7 +772,7 @@ int main(){
     catch(int error_code){
         switch(error_code){
             case 1001:
-                // 중간에 EXIT 선택한 경우
+                // 메뉴 선택에서 종료 선택한 경우
                 cout << "Exited From Option Selection. Ending ATM Session." << '\n';
                 break;
             case 1002:
@@ -765,23 +789,19 @@ int main(){
                 break;
             case 1005:
                 // 수수료 안 내겠다고 선택한 경우
-                cout << "수수료를 거부했습니다\n";
+                cout << "You refused to pay fee\n";
                 break;
             case 1006:
-                // 지폐 또는 수표를 제한 개수보다 많이 넣은 경우
-                cout << "지폐를 너무 많이 넣었습니다.\n";
+                // 지폐를 제한 개수보다 많이 넣은 경우
+                cout << "You entered too much cash/check.\n";
                 break;
             case 1007:
                 // 출금 횟수 초과한 경우
-                cout << "출금 횟수를 초과하였습니다.\n";
+                cout << "You exceeded the maximum deposit attempt.\n";
                 break;
             case 1008:
                 // 통장 잔액 부족한 경우
                 cout << "Lacking account balance.\n";
-                break;
-            case 1009:
-                // 수수료 잘못 입금한 경우
-                cout << "Deposited wrong fee.\n";
                 break;
         }
     }
