@@ -669,7 +669,7 @@ void Session(bool* IsFinished){
                     cout << "You chose withdrawal.\n";
                     withdrawal_count++;
                     if(withdrawal_count==4){
-                        cout<<"Four withdrawal in one session is not allowed.\n";
+                        cout<<"Four withdrawals in one session is not allowed.\n";
                         cout<<"Session aborted\n";
                         throw 1007;
                     }
@@ -702,8 +702,61 @@ void Session(bool* IsFinished){
                     break;
                 }
                 case 3:
+                {
                     //transfer
+                    cout << "Please choose transfer type.\n[0] EXIT\n[1] Cash transfer\n[2] Account Transfer\n";
+                    int choice;
+                    while(1){
+                        cin >> choice;
+                        if(choice == 0) throw 1001;
+                        else if(choice == 1 or choice == 2) break;
+                        else cout << "Wrong Input. Please try again : ";
+                    }
+                    string destination;
+                    cout << "Please input the destination acount number(XXX-XXX-XXXXXX) : ";
+                    while(1){
+                        cin >> destination;
+                        if(Accounts_DB.find(destination) ==  Accounts_DB.end()) cout << "Not Existing Account. Please try again (enter 0 to exit) : ";
+                        else if(destination == "0") throw 1001;
+                        else break;
+                    }
+                    Account *destination_account = Accounts_DB.at(destination);
+                    bool is_dest_primary_bank = destination_account->get_Bank_name() == this_ATM->get_bank_name();
+                    switch(choice){
+                        case 1:
+                        {
+                            int inserted_cash = Deposit(this_ATM, this_account);
+                            // 수수료 출금
+                            int transfer_fee;
+                            if(is_primary_bank_account and is_dest_primary_bank) transfer_fee = fee->NonPrimarytoPrimaryFee;
+                            else if(is_primary_bank_account or is_dest_primary_bank) transfer_fee = fee->NonPrimarytoNonPrimaryFee;
+                            else transfer_fee = fee->NonPrimarytoNonPrimaryFee;
+                            cout << "A transfer fee of " << transfer_fee << " KRW will be deposited from your account.\n";
+                            cout << "Will you continue to withdrawal? [Y]/[N] : ";
+                            string continue_option;
+                            while(1){
+                                cin >> continue_option;
+                                if(continue_option == "Y") break;
+                                else if(continue_option == "N") throw 1005;
+                                else cout << "Wrong input. Please try again : ";
+                            }
+                            if(this_account->get_balance() < transfer_fee) throw 1008;
+                            this_account->add_cash(-1*transfer_fee);
+                            destination_account->add_cash(inserted_cash);
+                            string local_history = "";
+                            string tmp = ("[Transaction ID: " + to_string(++unique_indentifier) + "] Transfers " + to_string(inserted_cash) + " KRW from Account[ID: "+ this_account->get_account_number()+"] to Account[ID: "+ destination_account->get_account_number() +"]");
+                            local_history += tmp;
+                            this_ATM->add_history(local_history);
+                            destination_account->add_history(local_history);
+                            break;
+                        }
+                        case 2:
+                        {
+                            break;
+                        }
+                    }
                     break;
+                }
                 default:
                     cout << "Wrong input. Please try again : ";
                     goto transaction_re_input;
@@ -725,7 +778,7 @@ int main(){
     catch(int error_code){
         switch(error_code){
             case 1001:
-                // 메뉴 선택에서 종료 선택한 경우
+                // 중간에 EXIT 선택한 경우
                 cout << "Exited From Option Selection. Ending ATM Session." << '\n';
                 break;
             case 1002:
