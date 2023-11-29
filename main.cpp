@@ -510,7 +510,7 @@ void display_everything(){
     cout << "----------------------------\nAll accounts\' information: Remaining balance\n";
     for(i = 0; i<Account_list.size();i++){
         Account* tmp = Account_list[i];
-        cout << "Account [Bank: " << tmp->get_Bank_name() << ", No: " << tmp->get_account_number() << ", Owner: " << tmp->get_user_name() << "] balance: " << tmp->get_balance();
+        cout << "Account [" << tmp->get_Bank_name() << " Bank " << tmp->get_account_number() << ", Owner : " << tmp->get_user_name() << "] balance: " << tmp->get_balance();
         cout << '\n';
     }
     cout << "\n";
@@ -556,7 +556,6 @@ int Deposit(ATM *this_ATM, Account *this_account){
                     throw 5;
                 }
             }
-            this_account->add_cash(money * NumofMoney);
             total_adding_cash += money*NumofMoney;
             //this_ATM->add_cash(total_adding_cash);
         }
@@ -566,7 +565,6 @@ int Deposit(ATM *this_ATM, Account *this_account){
                 cout << "The total amount of Cash you gave: "<< CountCash << "\n";
                 throw 6;
             }
-            this_account->add_cash(money*NumofMoney);
             total_adding_cash+=money*NumofMoney;
             this_ATM->add_cash(money, NumofMoney);
         }
@@ -649,10 +647,13 @@ void Session(bool* IsFinished){
                     while(1){
                         cin >> deposit_option;
                         if(deposit_option == "N") throw 1005;
-                        else if(deposit_option == "Y") break;
+                        else if(deposit_option == "Y"){
+                            total_adding_cash -= deposit_fee;
+                            break;
+                        }
                         else cout << "Wrong Input. Please try again : ";
                     }
-                    
+                    this_account->add_cash(total_adding_cash);
                     string local_history = "";
                     string tmp = ("[Transaction ID: " + to_string(++unique_indentifier) + "] Deposited " + to_string(total_adding_cash) + " won to Card[ID: "+ this_account->get_account_number()+"]");
                     local_history += tmp;
