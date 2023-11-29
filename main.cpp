@@ -507,7 +507,56 @@ void print(int situation){
     }
 }
 
-void Deposit(){
+int Deposit(ATM *this_ATM, Account *this_account){
+    int CountCash = 0;
+    int CountCheck = 0;
+    int tot_cash_deposited = 0;
+    long long total_adding_cash = 0;
+    cout << "Input either cash or money and the number of it (e.g., \"5000 2\", \"10000 3\") ";
+    cout << "If you're done, input 0\n";
+    while(1){
+        long long money, NumofMoney;
+        cin >> money;
+        if(money == 0) break;
+        cin >> NumofMoney;
+        if(money >= 100000){ // 수표일 때
+            CountCheck += NumofMoney;
+            if(CountCheck > this_ATM->LimitofCheck){
+                cout << "The total amount of Check you gave : " << CountCheck << "\n";
+                CountCheck -= NumofMoney;
+                continue;
+            }
+            if(this_ATM->get_bank_name() != this_account->get_Bank_name()){
+                cout<<"The fee will be "<<this_ATM->NonPrimaryDepositFee<<"won\n";
+                cout<<"Will you give fee? If yes, input 1. If no, input 0: ";
+                bool Ispayed;
+                cin >> Ispayed;
+                if(!Ispayed){
+                    cout<<"Abort transaction\n";
+                    throw 5;
+                }
+            }
+            this_account->add_cash(money * NumofMoney);
+            total_adding_cash += money*NumofMoney;
+            this_ATM->add_cash(1000, 1);
+            
+        }
+        else if (money==1000 || money==5000 || money==10000 || money==50000){
+            CountCash += NumofMoney;
+            if(CountCash > this_ATM->LimitofCash){
+                cout<<"The total amount of Cash you gave: "<<CountCash<<"\n";
+                throw 6;
+            }
+            this_account->add_cash(money*NumofMoney);
+            total_adding_cash+=money*NumofMoney;
+            this_ATM->add_cash(money, NumofMoney);
+        }
+        else{
+            cout<<"Invalid Money type";
+            cout<<"\n\n";
+            continue;
+        }
+    }
     return;
 }
 
@@ -571,72 +620,24 @@ void Session(bool* IsFinished){
                 case 1:
                 {
                     cout << "You chose deposit\n";
-                    int CountCash = 0;
-                    int CountCheck = 0;
+                    int total_adding_cash = Deposit(this_ATM, this_account);
                     string local_history = "";
-                    long long total_adding_cash = 0;
-                    cout << "Input either cash or money and the number of it (e.g., \"5000 2\", \"10000 3\") ";
-                    cout << "If you're done, input 0\n";
-                    while(1){
-                        long long money, NumofMoney;
-                        cin >> money;
-                        if(money==0) break;
-                        cin >> NumofMoney;
-                        if(money >= 100000){ // 수표일 때
-                            CountCheck += NumofMoney;
-                            if(CountCheck > this_ATM->LimitofCheck){
-                                cout << "The total amount of Check you gave : " << CountCheck << "\n";
-                                CountCheck -= NumofMoney;
-                                continue;
-                            }
-                            if(this_ATM->get_bank_name() != this_account->get_Bank_name()){
-                                cout<<"The fee will be "<<this_ATM->NonPrimaryDepositFee<<"won\n";
-                                cout<<"Will you give fee? If yes, input 1. If no, input 0: ";
-                                bool Ispayed;
-                                cin >> Ispayed;
-                                if(!Ispayed){
-                                    cout<<"Abort transaction\n";
-                                    throw 5;
-                                }
-                            }
-                            
-                            this_account->add_cash(money * NumofMoney);
-                            total_adding_cash += money*NumofMoney;
-                            this_ATM->add_cash(1000, 1);
-                            
-                        }
-                        else if (money==1000 || money==5000 || money==10000 || money==50000){
-                            CountCash += NumofMoney;
-                            if(CountCash>this_ATM->LimitofCash){
-                                cout<<"The total amount of Cash you gave: "<<CountCash<<"\n";
-                                CountCash-=NumofMoney;
-                                continue;
-                            }
-                            this_account->add_cash(money*NumofMoney);
-                            total_adding_cash+=money*NumofMoney;
-                            this_ATM->add_cash(money, NumofMoney);
-                        }
-                        else{
-                            cout<<"Invalid Money type";
-                            cout<<"\n\n";
-                            continue;
-                        }
-                        
-                    }
                     string tmp = ("[Transaction ID: " + to_string(++unique_indentifier) + "] Deposited " + to_string(total_adding_cash) + " won to Card[ID: "+ this_account->get_account_number()+"]");
-                    local_history+=tmp;
+                    local_history += tmp;
                     this_ATM->add_history(local_history);
                     this_account->add_history(local_history);
                 }
                 case 2:
                     // withdrawal
+
                     cout << "You chose withdrawal.\n";
                     withdrawal_count++;
                     if(withdrawal_count==4){
                         cout<<"Four withdrawal in one session is not allowed.\n";
                         cout<<"Session aborted\n";
-                        return;
+                        throw 7;
                     }
+                    
                 case 3:
                     //transfer
                 default:
@@ -672,6 +673,12 @@ int main(){
                 break;
             case 5:
                 // 수수료 안 내겠다고 선택한 경우
+                break;
+            case 6:
+                // 지폐를 제한 개수보다 많이 넣은 경우
+                break;
+            case 7:
+                // 출금 횟수 초과한 경우
                 break;
         }
     }
