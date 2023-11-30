@@ -961,11 +961,12 @@ void Session(bool* IsFinished){
             }
             else if(transaction_number=="3"){  // transfer  
                 print(30001);
-                int choice;
+                string choice;
                 while(1){
                     cin >> choice;
-                    if(choice == 0) throw 1001;
-                    else if(choice == 1 or choice == 2) break;
+                    if(choice == "0") throw 1001;
+                    else if(choice == "1" or choice == "2") break;
+                    else if(transaction_number == "X") display_everything();
                     else print(3);
                 }
                 string destination;
@@ -985,7 +986,8 @@ void Session(bool* IsFinished){
                 cout << destination_account->get_user_name() << "]\n";
                 bool is_dest_primary_bank = (destination_account->get_Bank_name() == this_ATM->get_bank_name());
                 int transfer_fee;
-                switch(choice){
+                int c = stoi(choice);
+                switch(c){
                     case 1:
                     {
                         int inserted_cash = Deposit(this_ATM);
