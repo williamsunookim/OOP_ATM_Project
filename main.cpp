@@ -1173,15 +1173,17 @@ int main(){
     while(1){
         try{
             Session(&IsFinished);
-            if(IsFinished) break;
+            if(IsFinished){
+                print(2000);
+                this_ATM->update();
+                display_everything();
+                cout << "\n\n";
+                break;
+            }
         }
         catch(int error_code){
             print(error_code);
         }
-        print(2000);
-        this_ATM->update();
-        display_everything();
-        cout << "\n\n";
     }
     return 0;
 }
