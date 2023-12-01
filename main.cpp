@@ -814,6 +814,10 @@ void print(int situation){
             if(IsEnglish) cout << " KRW\n\n";
             else cout << "원 입니다.\n\n";
             break;
+        case 30100:
+            if(IsEnglish) cout << "Transfer completed\n";
+            else cout << "이체가 완료되었습니다.\n";
+            break;
     }
 }
 
@@ -838,8 +842,6 @@ int Deposit(ATM *this_ATM){
         if(money >= 100000){ // 수표일 때
             CountCheck += NumofMoney;
             if(CountCheck > this_ATM->LimitofCheck){
-                print(4000);
-                cout << CountCheck << "\n";
                 throw 1006;
             }
             //this_ATM->add_cash(total_adding_cash);
@@ -1073,11 +1075,7 @@ void Session(bool* IsFinished){
                 switch(c){
                     case 1:
                     {
-
                         transfer_fee = CashTransferFee;
-                        while(1){
-
-                        }
                         if(IsEnglish){
                             cout<<"Insert cash to transfer with fee("<<transfer_fee<<" KRW): ";
                         }
@@ -1087,21 +1085,13 @@ void Session(bool* IsFinished){
 
                         int inserted_cash = Deposit(this_ATM);
                         inserted_cash-=transfer_fee;
-
-                        int continue_option;
-                        while(1){
-                            cin >> continue_option;
-                            if(continue_option == 1) break;
-                            else if(continue_option == 0) throw 1005;
-                            else print(3);
-                        }
                         destination_account->add_cash(inserted_cash);
                         string local_history = "";
                         string tmp = ("[Transaction ID: " + to_string(++unique_indentifier) + "] Transfers " + to_string(inserted_cash) + " KRW from Account[ID: "+ this_account->get_account_number()+"] to Account[ID: "+ destination_account->get_account_number() +"]");
                         local_history += tmp;
                         this_ATM->add_current_history(local_history);
                         destination_account->add_history(local_history);
-                        cout<<"Transfer completed\n";
+                        print(30100);
                         break;
                     }
                     case 2:
