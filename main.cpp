@@ -626,7 +626,7 @@ void print(int situation){
             if(IsEnglish) cout << "] balance: ";
             else cout << "] 통장 잔고: ";
             break;
-        case 10000:
+        case 4000:
             if(IsEnglish){
                 cout << "Input either cash or money and the number of it (e.g., \"5000 2\", \"10000 3\") ";
                 cout << "If you're done, input 0\n";
@@ -634,6 +634,18 @@ void print(int situation){
             else{
                 cout<<"돈이나 수표와 그 수량을 입력해주세요(예. \"5000 2\", \"10000 3\")";
             }
+            break;
+        case 4001:
+            if(IsEnglish) cout << "The total amount of Check you gave : ";
+            else cout << "입금한 수표의 총액은 : ";
+            break;
+        case 4002:
+            if(IsEnglish) cout << "The total amount of Cash you gave: ";
+            else cout << "입금한 현금의 총액은 : ";
+            break;
+        case 4003:
+            if(IsEnglish) cout << "Invalid Money type";
+            else cout << "유효하지 않은 금액입니다.";
             break;
         case 10001:
             if(IsEnglish) cout << "You chose deposit\n";
@@ -813,7 +825,7 @@ int Deposit(ATM *this_ATM){
     while(1){
         string x1;
         long long money, NumofMoney;
-        print(10000);
+        print(4000);
         input_again_03:
         cin >> x1;
         if(x1 == "0") break;
@@ -826,7 +838,8 @@ int Deposit(ATM *this_ATM){
         if(money >= 100000){ // 수표일 때
             CountCheck += NumofMoney;
             if(CountCheck > this_ATM->LimitofCheck){
-                cout << "The total amount of Check you gave : " << CountCheck << "\n";
+                print(4000);
+                cout << CountCheck << "\n";
                 throw 1006;
             }
             //this_ATM->add_cash(total_adding_cash);
@@ -834,13 +847,14 @@ int Deposit(ATM *this_ATM){
         else if (money==1000 || money==5000 || money==10000 || money==50000){
             CountCash += NumofMoney;
             if(CountCash > this_ATM->LimitofCash){
-                cout << "The total amount of Cash you gave: "<< CountCash << "\n";
+                print(4002);
+                cout << CountCash << "\n";
                 throw 1006;
             }
             this_ATM->add_cash(money, NumofMoney);
         }
         else{
-            cout<<"Invalid Money type";
+            print(4003);
             cout<<"\n\n";
             continue;
         }
