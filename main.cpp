@@ -904,7 +904,7 @@ void Session(bool* IsFinished){
                 string local_history = "";
                 string tmp = ("[Transaction ID: " + to_string(++unique_indentifier) + "] Deposited " + to_string(total_adding_cash) + " won to Card[ID: "+ this_account->get_account_number()+"]");
                 local_history += tmp;
-                this_ATM->add_history(local_history);
+                this_ATM->add_current_history(local_history);
                 this_account->add_history(local_history);
                 cout << total_adding_cash;
                 print(10005);
@@ -955,7 +955,7 @@ void Session(bool* IsFinished){
                 string local_history = "";
                 string tmp = ("[Transaction ID: " + to_string(++unique_indentifier) + "] Withdrawes " + to_string(withdrawal_cash_amount) + " KRW from Account[ID: "+ this_account->get_account_number()+"]");
                 local_history += tmp;
-                this_ATM->add_history(local_history);
+                this_ATM->add_current_history(local_history);
                 this_account->add_history(local_history);
                 break;
             }
@@ -1016,7 +1016,7 @@ void Session(bool* IsFinished){
                         string local_history = "";
                         string tmp = ("[Transaction ID: " + to_string(++unique_indentifier) + "] Transfers " + to_string(inserted_cash) + " KRW from Account[ID: "+ this_account->get_account_number()+"] to Account[ID: "+ destination_account->get_account_number() +"]");
                         local_history += tmp;
-                        this_ATM->add_history(local_history);
+                        this_ATM->add_current_history(local_history);
                         destination_account->add_history(local_history);
                         break;
                     }
@@ -1063,7 +1063,7 @@ void Session(bool* IsFinished){
                         this_account->add_cash(-1*transfer_amount);
                         destination_account->add_cash(transfer_amount);
                         local_history = ("[Transaction ID: " + to_string(++unique_indentifier) + "] Transfers " + to_string(transfer_amount) + " KRW from Account[ID: "+ this_account->get_account_number()+"] to Account[ID: "+ destination_account->get_account_number() +"]");
-                        this_ATM->add_history(local_history);
+                        this_ATM->add_current_history(local_history);
                         this_account->add_history(local_history);
                         destination_account->add_history(local_history);
                         print(30016);
