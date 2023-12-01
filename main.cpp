@@ -13,7 +13,6 @@ using namespace std;
 //Forward declaration
 class History;
 class Account;
-class Card;
 class ATM;
 class Bank;
 class User;
@@ -162,20 +161,6 @@ string User::get_user_name(){
 }
 
 //#############
-//####Card#####
-//#############
-class Card : public History{
-protected:
-    string CardNum;
-public:
-    Card(string CardNum);
-    string get_card_number();
-};
-string Card::get_card_number(){
-    return CardNum;
-}
-
-//#############
 //#####ATM#####
 //#############
 class ATM  : public History{
@@ -200,7 +185,7 @@ private:
 
 public:
     ATM(const bool language_option, Bank* bank_info, bool ATM_type, int initial_cash[], string admin_card_number);
-
+    ATM(const bool language_option, Bank* bank_info, bool ATM_type, int initial_cash[], string admin_card_number, string inputted_unique_number);
     const int NonPrimaryDepositFee = 1000; //다른 은행 예금 수수료 (REQ 1.8)
     const int PrimaryWithdrawalFee = 1000; //같은 은행 출금 수수료 (REQ 1.8)
     const int NonPrimaryWithDrawalFee = 2000; //다른 은행 출금 수수료 (REQ 1.8)
@@ -249,6 +234,20 @@ ATM::ATM(const bool language_option, Bank* bank_info, bool ATM_type, int initial
     }
     this->admin_card_number = admin_card_number;
 }
+ATM::ATM(const bool language_option, Bank* bank_info, bool ATM_type, int initial_cash[], string admin_card_number, string inputted_unique_number){
+    bank = bank_info;
+    order_number++;
+
+    unique_number = inputted_unique_number;
+
+    isbilingual = language_option;
+    isSingle = ATM_type;
+    for(int i = 0; i<4; i++){
+        AmountOfCash[i] = initial_cash[i];
+    }
+    this->admin_card_number = admin_card_number;
+}
+
 bool ATM::get_language_option(){
     return isbilingual;
 }
@@ -442,8 +441,17 @@ void Set_Initial_Condition(){
         cout << "The admin card number : ";
         string admin_card_num;
         cin >> admin_card_num;
+        //unique number
+        cout<<"Will you input this ATM's serial number? If yes, input serial number. If no, input -1(automatically generated) : ";
+        string serial_number;
+        cin>>serial_number;
         // input
-        ATM_list.push_back(new ATM(IsBilingual, Bank_list[bank_index], IsSingle, cash, admin_card_num));
+        if(serial_number=="-1"){
+            ATM_list.push_back(new ATM(IsBilingual, Bank_list[bank_index], IsSingle, cash, admin_card_num));
+        }
+        else{
+            ATM_list.push_back(new ATM(IsBilingual, Bank_list[bank_index], IsSingle, cash, admin_card_num, serial_number));
+        }
         //cash info
         cout << "Current cash amount of this ATM:" << '\n';
         ATM_list[index-1]->get_cash();
@@ -522,8 +530,8 @@ void print(int situation){
             }
             break;
         case 3:
-            if(IsEnglish) cout << "Wrong Input. Please try again : ";
-            else cout << "잘못된 입력입니다. 다시 시도해 주세요 : ";
+            if(IsEnglish) cout << "Wrong Input. Please try again\n\n";
+            else cout << "잘못된 입력입니다. 다시 시도해 주세요\n\n";
             break;
         case 4:
             if(IsEnglish) cout << "Please Enter Password : ";
@@ -589,8 +597,8 @@ void print(int situation){
             else cout << "\n\nATM 세션을 종료합니다.\n\n";
             break;
         case 3001:
-            if(IsEnglish) cout << "----------------------------\nAll ATMs\' information: Remaining cash";
-            else cout << "----------------------------\n모든 ATM의 정보: 잔여 현금 보유량";
+            if(IsEnglish) cout << "----------------------------\nAll ATMs\' information: Remaining cash\n";
+            else cout << "----------------------------\n모든 ATM의 정보: 잔여 현금 보유량\n";
             break;
         case 3002:
             if(IsEnglish) cout << "ATM [SN: ";
@@ -619,6 +627,15 @@ void print(int situation){
         case 3008:
             if(IsEnglish) cout << "] balance: ";
             else cout << "] 통장 잔고: ";
+            break;
+        case 10000:
+            if(IsEnglish){
+                cout << "Input either cash or money and the number of it (e.g., \"5000 2\", \"10000 3\") ";
+                cout << "If you're done, input 0\n";
+            }
+            else{
+                cout<<"돈이나 수표와 그 수량을 입력해주세요(예. \"5000 2\", \"10000 3\")";
+            }
             break;
         case 10001:
             if(IsEnglish) cout << "You chose deposit\n";
@@ -693,6 +710,10 @@ void print(int situation){
         case 20009:
             if(IsEnglish) cout<<"Not enough cash in this ATM.\n ";
             else cout<<"ATM에 현금이 부족합니다.\n";
+            break;
+        case 20010:
+            if(IsEnglish) cout<<"Withdrawal completed\n";
+            else cout<<"입금 완료\n";
             break;
         case 30001:
             if(IsEnglish) cout << "Please choose transfer type.\n[0] EXIT\n[1] Cash transfer\n[2] Account Transfer\n";
@@ -791,11 +812,10 @@ int Deposit(ATM *this_ATM){
     int CountCheck = 0;
     long long tot_cash_deposited = 0;
     long long total_adding_cash = 0;
-    cout << "Input either cash or money and the number of it (e.g., \"5000 2\", \"10000 3\") ";
-    cout << "If you're done, input 0\n";
     while(1){
         string x1;
         long long money, NumofMoney;
+        print(10000);
         input_again_03:
         cin >> x1;
         if(x1 == "0") break;
@@ -912,12 +932,11 @@ void Session(bool* IsFinished){
                 print(10001);
                 int total_adding_cash = Deposit(this_ATM);
                 int deposit_fee = (is_primary_bank_account) ? (PrimaryDepositFee) : (NonPrimaryDepositFee);
-                print(10002);
-                cout << deposit_fee;
-                print(10003);
-                cout << deposit_fee;
-                string deposit_option;
                 while(1){
+                    print(10002);
+                    cout << deposit_fee;
+                    print(10003);
+                    string deposit_option;
                     cin >> deposit_option;
                     if(deposit_option == "0") throw 1005; // 수수료 안 내겠다
                     else if(deposit_option == "1"){
@@ -945,25 +964,24 @@ void Session(bool* IsFinished){
                 withdrawal_again:
                 print(20001);
                 withdrawal_count++;
-                int LimitAmountCash = 500000; // 한 번 transaction당 최대 출금 금액
+                const int LimitAmountCash = 500000; // 한 번 transaction당 최대 출금 금액
                 if(withdrawal_count==4) throw 1007; // 출금 횟수 초과 예외 처리
                 print(20002);
                 string x;
-                long long withdrawal_cash_amount = stoll(x);
                 int withdrawal_fee = (is_primary_bank_account) ? PrimaryWithdrawalFee : NonPrimaryWithDrawalFee;
                 while(1){
                     cin >> x;
-                    withdrawal_cash_amount = stoll(x);
                     //수수료를 포함한 출금 금액
-                    if(this_account->get_balance() < withdrawal_cash_amount+withdrawal_fee) print(20003);
-                    else if(withdrawal_cash_amount>LimitAmountCash){
+                    if(this_account->get_balance() < stoll(x)+withdrawal_fee) print(20003);
+                    else if(stoll(x)>LimitAmountCash){
                         print(20004);
                         cout << LimitAmountCash;
                         print(20005);
-                    }else if(withdrawal_cash_amount%1000!=0) print(20008);
+                    }else if(stoll(x)%1000!=0) print(20008);
                     else if(x == "X") display_everything();
                     else break;
                 }
+                long long withdrawal_cash_amount = stoll(x);
                 // 수수료 출금
                 print(20006);
                 cout << withdrawal_fee;
@@ -976,25 +994,33 @@ void Session(bool* IsFinished){
                     else break;
                 }
                 if(continue_option=="N") throw 1005;
-                long long tmp_with_drawal_cash_amount = withdrawal_cash_amount;
-                this_ATM->add_cash(50000, -1*(tmp_with_drawal_cash_amount/50000));
-                tmp_with_drawal_cash_amount%=50000;
-                this_ATM->add_cash(50000, -1*(tmp_with_drawal_cash_amount/10000));
+                if(withdrawal_cash_amount>this_ATM->get_total_cash()){
+                    print(20009);
+                    withdrawal_count--;
+                    goto withdrawal_again;
+                }
+                long long tmp_withdrawal_cash_amount = withdrawal_cash_amount;
+                int* cash_array = this_ATM->get_cash_array();
+                int amountof50000 = (cash_array[3]<tmp_withdrawal_cash_amount/50000) ? cash_array[3] : tmp_withdrawal_cash_amount/50000;
+                tmp_withdrawal_cash_amount-=amountof50000*50000;
+                int amountof10000 = (cash_array[2] < tmp_withdrawal_cash_amount/10000) ? cash_array[2] : tmp_withdrawal_cash_amount/10000;
+                tmp_withdrawal_cash_amount -= amountof10000*10000;
+                if(tmp_withdrawal_cash_amount!=0){
+                    print(20009);
+                    withdrawal_count--;
+                    goto withdrawal_again;
+                }
+                this_ATM->add_cash(50000, -amountof50000);
+                this_ATM->add_cash(10000, -amountof10000);
                 // 거래기록 업데이트
                 this_account->add_cash(-1*(withdrawal_cash_amount+withdrawal_fee));
                 string local_history = "";
                 string tmp = ("[Transaction ID: " + to_string(++unique_indentifier) + "] Withdrawes " + to_string(withdrawal_cash_amount) + " KRW from Account[ID: "+ this_account->get_account_number()+"]");
+                print(20010);
                 local_history += tmp;
                 this_ATM->add_current_history(local_history);
                 this_account->add_history(local_history);
-                while(1){
-                    cin >> continue_option;
-                    if(continue_option != "Y" && continue_option != "N") print(3);
-                    else if(continue_option == "X") display_everything();
-                    else break;
-                }
-                if(continue_option == "Y") goto withdrawal_again;
-                break;
+                continue;
             }
             else if(transaction_number=="3"){  // transfer  
                 print(30001);
@@ -1116,7 +1142,7 @@ void Session(bool* IsFinished){
                         break;
                     }
                 }
-                break;
+                continue;
             }else{
                 if(transaction_number == "X") display_everything();
                 else print(3);
