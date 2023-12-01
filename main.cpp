@@ -45,7 +45,7 @@ void History::add_history(string transaction){
 }
 void History::add_current_history(string transaction){
     current_session_history.push(transaction);
-    entire_string_history+=transaction;
+    entire_string_history+=(transaction+"\n");
 }
 void History::update(){
     while(!current_session_history.empty()){
@@ -56,7 +56,7 @@ void History::update(){
     }
 }
 void History::show_history(){
-    for(string line : transaction_history) cout << line << '\n';
+    cout<<entire_string_history<<'\n';
 }
 string History::return_string_history(){
     return entire_string_history;
@@ -477,7 +477,7 @@ int before_session(){
     cout << "-------------------------------------------\n";
     cout << "\n";
     for(int i = 0; i<ATM_list.size(); i++) cout << "[" << i+1 << "] ATM " << i+1 << " ("<<ATM_list[i]->get_bank_name() << ", supporting " << (ATM_list[i]->get_ATM_type() ? "Single" : "Multiple") << " language)" << '\n';
-    cout << "Choose the ATM which you will use. Input a number : ";
+    cout << "Choose the ATM which you will use. If you want to exit, input 0 : ";
     int index;
     cin >> index;
     return index;
@@ -505,7 +505,8 @@ void display_everything(){
         print(3008);
         cout << tmp->get_balance() << '\n';
     }
-    cout << "\n";
+    cout << "\n\n";
+    this_ATM->show_history();
 }
 
 int unique_indentifier = 0;
@@ -717,7 +718,7 @@ void print(int situation){
             else cout << "이체 종류를 선택해 주세요.\n[0] 나가기\n[1] 현금 이체\n[2] 계좌 이체\n";
             break;
         case 30002:
-            if(IsEnglish) cout << "Please input the destination acount number(XXX-XXX-XXXXXX) : ";
+            if(IsEnglish) cout << "Please input the destination account number(XXX-XXX-XXXXXX) : ";
             else cout << "이체할 곳의 계좌번호를 입력해 주세요(XXX-XXX-XXXXXX) : ";
             break;
         case 30003:
@@ -850,25 +851,28 @@ int Deposit(ATM *this_ATM){
 
 void Session(bool* IsFinished){
     int ATM_index = before_session()-1;
+    if(ATM_index==-1){
+        exit(0);
+    }
     this_ATM = ATM_list[ATM_index];
     cout << "This is ATM " << ATM_index+1 << " session. Whenever you want to exit a session, please input 0\n";
     if(this_ATM->get_language_option()){
-        cout << "Please Select a language.\n[0] EXIT\n[1] English\n[2] Korean" << '\n';
         int k;
         while(1){
+            cout << "\nPlease Select a language.\n[0] EXIT\n[1] English\n[2] Korean" << '\n';
             cin >> k;
             if(k == 0) throw 1001;
-            else if(k != 1 and k != 2) print(3);
+            else if(k != 1 && k != 2) print(3);
             else break;
         }
         IsEnglish = (k == 1) ? true : false;
     }
+    int withdrawal_count = 0;
     while(1){       // transaction이 여러번 일어날 수 있기 때문
         print(1);   // insert card
         string card_num;
         input_again_10:
         cin >> card_num;
-        int withdrawal_count = 0;
         if(card_num=="0"){
             *IsFinished = true;
             break;
@@ -885,7 +889,6 @@ void Session(bool* IsFinished){
                     ofstream file("Transaction_History.txt");
                     if(file.is_open()){
                         file<<history;
-                        file<<"\n";
                         cout<<"Transaction_History.txt generated\n";
                         file.close();
                         return;
@@ -894,7 +897,6 @@ void Session(bool* IsFinished){
                 else if(x == "X")  display_everything();
                 else print(3);
             }
-            this_ATM->show_history();
         }
         else{
             if(card_num == "X"){
@@ -1042,7 +1044,7 @@ void Session(bool* IsFinished){
                     cin >> destination;
                     if(Accounts_DB.find(destination) ==  Accounts_DB.end()) print(30003);
                     else if(destination == this_account->get_account_number()) print(30004);
-                    // else if(destination == "0") throw 1001;
+                    else if(destination == "0") throw 1001;
                     else if(destination == "X") display_everything();
                     else break;
                 }
@@ -1085,12 +1087,13 @@ void Session(bool* IsFinished){
                         local_history += tmp;
                         this_ATM->add_current_history(local_history);
                         destination_account->add_history(local_history);
+                        cout<<"Transfer completed\n";
                         break;
                     }
                     case 2:
                     {
-                        if(is_primary_bank_account && is_dest_primary_bank) transfer_fee = NonPrimarytoPrimaryFee;
-                        else if(is_primary_bank_account || is_dest_primary_bank) transfer_fee = NonPrimarytoNonPrimaryFee;
+                        if(is_primary_bank_account && is_dest_primary_bank) transfer_fee = PrimarytoPrimaryFee;
+                        else if(is_primary_bank_account || is_dest_primary_bank) transfer_fee = NonPrimarytoPrimaryFee;
                         else transfer_fee = NonPrimarytoNonPrimaryFee;
                         print(30012);
                         string source_account_num;
