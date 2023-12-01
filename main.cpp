@@ -223,6 +223,7 @@ public:
     Bank* get_bank();
     string get_admin_card_number();
     void add_cash(int money, int NumofMoney);
+    int* get_cash_array();
     /*
     void add_history(string history);
     void show_history();
@@ -282,6 +283,9 @@ void ATM::add_cash(int money, int NumofMoney){
     else if(money==5000) AmountOfCash[1] += NumofMoney;
     else if(money==10000) AmountOfCash[2] += NumofMoney;
     else if(money==50000) AmountOfCash[3] += NumofMoney;
+}
+int* ATM::get_cash_array(){
+    return AmountOfCash;
 }
 
 int NonPrimaryDepositFee = 1000;            // 다른 은행 예금 수수료 (REQ 1.8)
@@ -685,6 +689,10 @@ void print(int situation){
             if(IsEnglish) cout << "Not withdrawable amount. Please try again: ";
             else cout << "출금 불가능한 금액입니다. 다시 시도해 주세요 : ";
             break;
+        case 20009:
+            if(IsEnglish) cout<<"Not enough cash in this ATM.\n ";
+            else cout<<"ATM에 현금이 부족합니다.\n";
+            break;
         case 30001:
             if(IsEnglish) cout << "Please choose transfer type.\n[0] EXIT\n[1] Cash transfer\n[2] Account Transfer\n";
             else cout << "이체 종류를 선택해 주세요.\n[0] 나가기\n[1] 현금 이체\n[2] 계좌 이체\n";
@@ -961,10 +969,22 @@ void Session(bool* IsFinished){
                     else break;
                 }
                 if(continue_option=="N") throw 1005;
-                long long tmp_with_drawal_cash_amount = withdrawal_cash_amount;
-                this_ATM->add_cash(50000, -1*(tmp_with_drawal_cash_amount/50000));
-                tmp_with_drawal_cash_amount%=50000;
-                this_ATM->add_cash(50000, -1*(tmp_with_drawal_cash_amount/10000));
+                if(withdrawal_cash_amount>this_ATM->get_total_cash()){
+                    print(20009);
+                    break;
+                }
+                long long tmp_withdrawal_cash_amount = withdrawal_cash_amount;
+                int* cash_array = this_ATM->get_cash_array();
+                int amountof50000 = (cash_array[3]<tmp_withdrawal_cash_amount/50000) ? cash_array[3] : tmp_withdrawal_cash_amount/50000;
+                tmp_withdrawal_cash_amount-=amountof50000*50000;
+                int amountof10000 = (cash_array[2] < tmp_withdrawal_cash_amount/10000) ? cash_array[2] : tmp_withdrawal_cash_amount/10000;
+                tmp_withdrawal_cash_amount -= amountof10000*10000;
+                if(tmp_withdrawal_cash_amount!=0){
+                    print(20009);
+                    break;
+                }
+                this_ATM->add_cash(50000, -amountof50000);
+                this_ATM->add_cash(10000, -amountof10000);
                 // 거래기록 업데이트
                 this_account->add_cash(-1*(withdrawal_cash_amount+withdrawal_fee));
                 string local_history = "";
@@ -1108,8 +1128,8 @@ int main(){
     //input 생략법
     Bank_list.push_back(new Bank("Kakao"));
     Bank_list.push_back(new Bank("Daegu"));
-    int arr_1[4] = {5, 0, 0, 0}; 
-    int arr_2[4] = {0, 1, 0, 0}; 
+    int arr_1[4] = {5, 0, 10, 1}; 
+    int arr_2[4] = {0, 1, 0, 1}; 
     int arr_3[4] = {0, 1, 0, 0}; 
     ATM_list.push_back(new ATM(false, Bank_list[0], true, arr_1, "1"));
     ATM_list.push_back(new ATM(true, Bank_list[1], false, arr_2, "1"));
@@ -1117,7 +1137,7 @@ int main(){
     User_list.push_back(new User("David"));
     User_list.push_back(new User("Jane"));
     User_list.push_back(new User("Kate"));
-    Account_list.push_back(new Account(Bank_list[0], "David", "111-111-111111", 5000, "1"));
+    Account_list.push_back(new Account(Bank_list[0], "David", "111-111-111111", 100000, "1"));
     Account_list.push_back(new Account(Bank_list[1], "Jane", "222-222-222222", 5000, "1"));
     Account_list.push_back(new Account(Bank_list[0], "Kate", "333-333-333333", 5000, "1"));
     Accounts_DB["111-111-111111"] = Account_list[0];
