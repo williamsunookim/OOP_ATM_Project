@@ -1059,12 +1059,21 @@ void Session(bool* IsFinished){
                 switch(c){
                     case 1:
                     {
-                        int inserted_cash = Deposit(this_ATM);
+
                         transfer_fee = CashTransferFee;
-                        // 수수료 출금
-                        print(30007);
-                        cout << transfer_fee;
-                        print(30008);
+                        while(1){
+
+                        }
+                        if(IsEnglish){
+                            cout<<"Insert cash to transfer with fee("<<transfer_fee<<" KRW): ";
+                        }
+                        else{
+                            cout<<"수수료("<<transfer_fee<<" 원)을 포함하여 이체할 현금을 투입해주세요: ";
+                        }
+
+                        int inserted_cash = Deposit(this_ATM);
+                        inserted_cash-=transfer_fee;
+
                         int continue_option;
                         while(1){
                             cin >> continue_option;
@@ -1093,7 +1102,7 @@ void Session(bool* IsFinished){
                     case 2:
                     {
                         if(is_primary_bank_account && is_dest_primary_bank) transfer_fee = PrimarytoPrimaryFee;
-                        else if(is_primary_bank_account || is_dest_primary_bank) transfer_fee = NonPrimarytoPrimaryFee;
+                        else if(is_primary_bank_account || is_dest_primary_bank) transfer_fee =NonPrimarytoPrimaryFee;
                         else transfer_fee = NonPrimarytoNonPrimaryFee;
                         print(30012);
                         string source_account_num;
@@ -1189,7 +1198,6 @@ int main(){
                 this_ATM->update();
                 display_everything();
                 cout << "\n\n";
-                break;
             }
         }
         catch(int error_code){
