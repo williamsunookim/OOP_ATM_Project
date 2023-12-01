@@ -5,6 +5,8 @@
 #include <vector>
 #include <queue>
 #include <map>
+#include <fstream>
+#include <string>
 
 using namespace std;
 
@@ -30,6 +32,7 @@ class History{
         void update();
         void show_history();
         void reset_history();
+        string return_string_history();
 };
 History::History(){
     ;
@@ -56,6 +59,11 @@ void History::show_history(){
 }
 void History::reset_history(){
     this->transaction_history.clear();
+}
+string History::return_string_history(){
+    string x;
+    for (string line : transaction_history) x+=(line+"\n");
+    return x;
 }
 //#############
 //####Bank#####
@@ -216,6 +224,7 @@ public:
     Bank* get_bank();
     string get_admin_card_number();
     void add_cash(int money, int NumofMoney);
+    int* get_cash_array();
     /*
     void add_history(string history);
     void show_history();
@@ -275,6 +284,9 @@ void ATM::add_cash(int money, int NumofMoney){
     else if(money==5000) AmountOfCash[1] += NumofMoney;
     else if(money==10000) AmountOfCash[2] += NumofMoney;
     else if(money==50000) AmountOfCash[3] += NumofMoney;
+}
+int* ATM::get_cash_array(){
+    return AmountOfCash;
 }
 
 int NonPrimaryDepositFee = 1000;            // 다른 은행 예금 수수료 (REQ 1.8)
@@ -678,6 +690,10 @@ void print(int situation){
             if(IsEnglish) cout << "Not withdrawable amount. Please try again: ";
             else cout << "출금 불가능한 금액입니다. 다시 시도해 주세요 : ";
             break;
+        case 20009:
+            if(IsEnglish) cout<<"Not enough cash in this ATM.\n ";
+            else cout<<"ATM에 현금이 부족합니다.\n";
+            break;
         case 30001:
             if(IsEnglish) cout << "Please choose transfer type.\n[0] EXIT\n[1] Cash transfer\n[2] Account Transfer\n";
             else cout << "이체 종류를 선택해 주세요.\n[0] 나가기\n[1] 현금 이체\n[2] 계좌 이체\n";
@@ -843,8 +859,15 @@ void Session(bool* IsFinished){
             while(1){
                 cin >> x;
                 if(x == "0") return;
-                else if(x == "1") break;
-                else if(x == "X") display_everything();
+                else if(x == "1") {
+                    string history = this_ATM->return_string_history();
+                    ofstream file("Transaction_History.txt");
+                    if(file.is_open()){
+                        file<<history;
+                        file.close();
+                    }
+                }
+                else if(x == "X")  display_everything();
                 else print(3);
             }
             this_ATM->show_history();
@@ -946,9 +969,17 @@ void Session(bool* IsFinished){
                 cout << withdrawal_fee;
                 print(20007);
                 string continue_option;
-                this_ATM->add_cash(50000, -1*(withdrawal_cash_amount/50000));
-                withdrawal_cash_amount%=50000;
-                this_ATM->add_cash(50000, -1*(withdrawal_cash_amount/10000));
+                while(1){
+                    cin >> continue_option;
+                    if(continue_option != "Y" && continue_option != "N") print(3);
+                    else if(continue_option == "X") display_everything();
+                    else break;
+                }
+                if(continue_option=="N") throw 1005;
+                long long tmp_with_drawal_cash_amount = withdrawal_cash_amount;
+                this_ATM->add_cash(50000, -1*(tmp_with_drawal_cash_amount/50000));
+                tmp_with_drawal_cash_amount%=50000;
+                this_ATM->add_cash(50000, -1*(tmp_with_drawal_cash_amount/10000));
                 // 거래기록 업데이트
                 this_account->add_cash(-1*(withdrawal_cash_amount+withdrawal_fee));
                 string local_history = "";
@@ -1100,8 +1131,8 @@ int main(){
     //input 생략법
     Bank_list.push_back(new Bank("Kakao"));
     Bank_list.push_back(new Bank("Daegu"));
-    int arr_1[4] = {5, 0, 0, 0}; 
-    int arr_2[4] = {0, 1, 0, 0}; 
+    int arr_1[4] = {5, 0, 10, 1}; 
+    int arr_2[4] = {0, 1, 0, 1}; 
     int arr_3[4] = {0, 1, 0, 0}; 
     ATM_list.push_back(new ATM(false, Bank_list[0], true, arr_1, "1"));
     ATM_list.push_back(new ATM(true, Bank_list[1], false, arr_2, "1"));
@@ -1109,7 +1140,7 @@ int main(){
     User_list.push_back(new User("David"));
     User_list.push_back(new User("Jane"));
     User_list.push_back(new User("Kate"));
-    Account_list.push_back(new Account(Bank_list[0], "David", "111-111-111111", 5000, "1"));
+    Account_list.push_back(new Account(Bank_list[0], "David", "111-111-111111", 100000, "1"));
     Account_list.push_back(new Account(Bank_list[1], "Jane", "222-222-222222", 5000, "1"));
     Account_list.push_back(new Account(Bank_list[0], "Kate", "333-333-333333", 5000, "1"));
     Accounts_DB["111-111-111111"] = Account_list[0];
