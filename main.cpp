@@ -23,6 +23,7 @@ class History{
     private:
         vector<string> transaction_history;
         queue<string> current_session_history;
+        string entire_string_history = "";
     public:
         History();
         ~History();
@@ -40,9 +41,11 @@ History::~History(){
 }
 void History::add_history(string transaction){
     transaction_history.push_back(transaction);
+    entire_string_history+=(transaction+"\n");
 }
 void History::add_current_history(string transaction){
     current_session_history.push(transaction);
+    entire_string_history+=transaction;
 }
 void History::update(){
     while(!current_session_history.empty()){
@@ -56,9 +59,7 @@ void History::show_history(){
     for(string line : transaction_history) cout << line << '\n';
 }
 string History::return_string_history(){
-    string x;
-    for (string line : transaction_history) x+=(line+"\n");
-    return x;
+    return entire_string_history;
 }
 //#############
 //####Bank#####
@@ -562,31 +563,31 @@ void print(int situation){
             break;
         case 1003:
             if(IsEnglish) cout << "[ERROR] This card is not able to use in this ATM.\n";
-            else cout << "이 카드는 이 ATM에서 사용하실 수 없습니다.\n";
+            else cout << "[ERROR] 이 카드는 이 ATM에서 사용하실 수 없습니다.\n";
             break;
         case 1004:
             if(IsEnglish) cout << "[ERROR] Wrong password input for 3 times.\n";
-            else cout << "비밀번호를 3회 잘못 입력하셨습니다.\n";
+            else cout << "[ERROR] 비밀번호를 3회 잘못 입력하셨습니다.\n";
             break;
         case 1005:
             if(IsEnglish) cout << "[ERROR] Refused to pay fee.\n";
-            else cout << "수수료 결제를 거부하셨습니다.\n";
+            else cout << "[ERROR] 수수료 결제를 거부하셨습니다.\n";
             break;
         case 1006:
             if(IsEnglish) cout << "[ERROR] You inserted too much cash/check.\n";
-            else cout << "지폐/수표를 제한 갯수보다 많이 넣으셨습니다.\n";
+            else cout << "[ERROR] 지폐/수표를 제한 개수보다 많이 넣으셨습니다.\n";
             break;
         case 1007:
             if(IsEnglish) cout << "[ERROR] Exceeded amount of available deposit attempt.\n";
-            else cout << "3회 이상 출금하실 수 없습니다.\n";
+            else cout << "[ERROR] 3회 이상 출금하실 수 없습니다.\n";
             break;
         case 1008:
             if(IsEnglish) cout << "[ERROR] Not enough account balance.\n";
-            else cout << "통장 잔액이 부족합니다.\n";
+            else cout << "[ERROR] 통장 잔액이 부족합니다.\n";
             break;
         case 1009:
             if(IsEnglish) cout << "[ERROR] Deposited wrong fee.\n";
-            else cout << "수수료를 잘못 입금하셨습니다.\n";
+            else cout << "[ERROR] 수수료를 잘못 입금하셨습니다.\n";
             break;
         case 2000:
             if(IsEnglish) cout << "\n\nEnding ATM Session.\n\n";
@@ -647,12 +648,12 @@ void print(int situation){
                 cout << "Will you continue?\n[0] NO\t[1] YES\n";
             }else{
                 cout << "원을 추가로 입금해 주세요.\n";
-                cout << "계속하시겠습니까?\n[0] 네\t[1] 아니오\n";
+                cout << "계속하시겠습니까?\n[0] 아니오\t[1] 네\n";
             }
             break;
         case 10004:
             if(IsEnglish) cout << "You added additional cash(1000 won, 1)\n";
-            else cout << "추가로 1000원 1장을 입금하셨습니다.\n";
+            else cout << "추가로 1000원 1장을 입금하셨습니다(1000원, 1)\n";
             break;
         case 10005:
             if(IsEnglish) cout << " KRW is deposited to your account.\n";
@@ -868,6 +869,10 @@ void Session(bool* IsFinished){
         input_again_10:
         cin >> card_num;
         int withdrawal_count = 0;
+        if(card_num=="0"){
+            *IsFinished = true;
+            break;
+        }
         if(card_num == this_ATM->get_admin_card_number()){
             //  ADMIN MODE
             string x;
@@ -880,7 +885,10 @@ void Session(bool* IsFinished){
                     ofstream file("Transaction_History.txt");
                     if(file.is_open()){
                         file<<history;
+                        file<<"\n";
+                        cout<<"Transaction_History.txt generated\n";
                         file.close();
+                        return;
                     }
                 }
                 else if(x == "X")  display_everything();
