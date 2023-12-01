@@ -4,6 +4,8 @@
 #include <vector>
 #include <queue>
 #include <map>
+#include <fstream>
+#include <string>
 
 using namespace std;
 
@@ -29,6 +31,7 @@ class History{
         void update();
         void show_history();
         void reset_history();
+        string return_string_history();
 };
 History::History(){
     ;
@@ -55,6 +58,11 @@ void History::show_history(){
 }
 void History::reset_history(){
     this->transaction_history.clear();
+}
+string History::return_string_history(){
+    string x;
+    for (string line : transaction_history) x+=(line+"\n");
+    return x;
 }
 //#############
 //####Bank#####
@@ -838,8 +846,15 @@ void Session(bool* IsFinished){
             while(1){
                 cin >> x;
                 if(x == "0") return;
-                else if(x == "1") break;
-                else if(x == "X") display_everything();
+                else if(x == "1") {
+                    string history = this_ATM->return_string_history();
+                    ofstream file("Transaction_History.txt");
+                    if(file.is_open()){
+                        file<<history;
+                        file.close();
+                    }
+                }
+                else if(x == "X")  display_everything();
                 else print(3);
             }
             this_ATM->show_history();
