@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <string>
 #include <string.h>
 #include <vector>
 #include <queue>
@@ -577,7 +578,7 @@ void print(int situation){
             break;
         case 3001:
             if(IsEnglish) cout << "----------------------------\nAll ATMs\' information: Remaining cash";
-            else cout << "----------------------------\n모든 ATM의\' 정보: 잔여 현금 보유량";
+            else cout << "----------------------------\n모든 ATM의 정보: 잔여 현금 보유량";
             break;
         case 3002:
             if(IsEnglish) cout << "ATM [SN: ";
@@ -589,7 +590,7 @@ void print(int situation){
             break;
         case 3004:
             if(IsEnglish) cout << "----------------------------\nAll accounts\' information: Remaining balance\n";
-            else cout << "----------------------------\n모든 계좌들의\' 정보: 통장 잔고\n";
+            else cout << "----------------------------\n모든 계좌들의 정보: 통장 잔고\n";
             break;
         case 3005:
             if(IsEnglish) cout << "Account [";
@@ -821,8 +822,12 @@ void Session(bool* IsFinished){
     if(this_ATM->get_language_option()){
         cout << "Please Select a language.\n[0] EXIT\n[1] English\n[2] Korean" << '\n';
         int k;
-        cin >> k;
-        if(k == 0) throw 1001;
+        while(1){
+            cin >> k;
+            if(k == 0) throw 1001;
+            else if(k != 1 and k != 2) print(3);
+            else break;
+        }
         IsEnglish = (k == 1) ? true : false;
     }
     while(1){       // transaction이 여러번 일어날 수 있기 때문
@@ -899,7 +904,7 @@ void Session(bool* IsFinished){
                     else if(deposit_option == "X") display_everything();
                     else print(3);
                 }
-                this_ATM->add_cash(1000, 1); // 수수료 추가 납입
+                if(!is_primary_bank_account) this_ATM->add_cash(1000, 1); // 수수료 추가 납입
                 this_account->add_cash(total_adding_cash);
                 string local_history = "";
                 string tmp = ("[Transaction ID: " + to_string(++unique_indentifier) + "] Deposited " + to_string(total_adding_cash) + " won to Card[ID: "+ this_account->get_account_number()+"]");
@@ -914,42 +919,36 @@ void Session(bool* IsFinished){
                 break;
             }
             else if(transaction_number=="2"){ // withdrawal
+                withdrawal_again:
                 print(20001);
                 withdrawal_count++;
                 int LimitAmountCash = 500000; // 한 번 transaction당 최대 출금 금액
                 if(withdrawal_count==4) throw 1007; // 출금 횟수 초과 예외 처리
                 print(20002);
                 string x;
+                long long withdrawal_cash_amount = stoll(x);
                 int withdrawal_fee = (is_primary_bank_account) ? PrimaryWithdrawalFee : NonPrimaryWithDrawalFee;
                 while(1){
                     cin >> x;
+                    withdrawal_cash_amount = stoll(x);
                     //수수료를 포함한 출금 금액
-                    if(this_account->get_balance() < stoll(x)+withdrawal_fee) print(20003);
-                    else if(stoll(x)>LimitAmountCash){
+                    if(this_account->get_balance() < withdrawal_cash_amount+withdrawal_fee) print(20003);
+                    else if(withdrawal_cash_amount>LimitAmountCash){
                         print(20004);
                         cout << LimitAmountCash;
                         print(20005);
-                    }else if(stoll(x)%1000!=0) print(20008);
+                    }else if(withdrawal_cash_amount%1000!=0) print(20008);
                     else if(x == "X") display_everything();
                     else break;
                 }
-                long long withdrawal_cash_amount = stoll(x);
                 // 수수료 출금
                 print(20006);
                 cout << withdrawal_fee;
                 print(20007);
                 string continue_option;
-                while(1){
-                    cin >> continue_option;
-                    if(continue_option != "Y" && continue_option != "N") print(3);
-                    else if(continue_option == "X") display_everything();
-                    else break;
-                }
-                if(continue_option=="N") throw 1005;
-                long long tmp_with_drawal_cash_amount = withdrawal_cash_amount;
-                this_ATM->add_cash(50000, -1*(tmp_with_drawal_cash_amount/50000));
-                tmp_with_drawal_cash_amount%=50000;
-                this_ATM->add_cash(50000, -1*(tmp_with_drawal_cash_amount/10000));
+                this_ATM->add_cash(50000, -1*(withdrawal_cash_amount/50000));
+                withdrawal_cash_amount%=50000;
+                this_ATM->add_cash(50000, -1*(withdrawal_cash_amount/10000));
                 // 거래기록 업데이트
                 this_account->add_cash(-1*(withdrawal_cash_amount+withdrawal_fee));
                 string local_history = "";
@@ -957,6 +956,13 @@ void Session(bool* IsFinished){
                 local_history += tmp;
                 this_ATM->add_current_history(local_history);
                 this_account->add_history(local_history);
+                while(1){
+                    cin >> continue_option;
+                    if(continue_option != "Y" && continue_option != "N") print(3);
+                    else if(continue_option == "X") display_everything();
+                    else break;
+                }
+                if(continue_option == "Y") goto withdrawal_again;
                 break;
             }
             else if(transaction_number=="3"){  // transfer  
@@ -1063,6 +1069,7 @@ void Session(bool* IsFinished){
                         this_account->add_cash(-1*transfer_amount);
                         destination_account->add_cash(transfer_amount);
                         local_history = ("[Transaction ID: " + to_string(++unique_indentifier) + "] Transfers " + to_string(transfer_amount) + " KRW from Account[ID: "+ this_account->get_account_number()+"] to Account[ID: "+ destination_account->get_account_number() +"]");
+                        cout << '\n' << local_history << '\n';
                         this_ATM->add_current_history(local_history);
                         this_account->add_history(local_history);
                         destination_account->add_history(local_history);
@@ -1123,6 +1130,5 @@ int main(){
         display_everything();
         cout << "\n\n";
     }
-    
     return 0;
 }
