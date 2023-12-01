@@ -1153,9 +1153,9 @@ int main(){
     //input 생략법
     Bank_list.push_back(new Bank("Kakao"));
     Bank_list.push_back(new Bank("Daegu"));
-    int arr_1[4] = {5, 0, 10, 1}; 
-    int arr_2[4] = {0, 1, 0, 1}; 
-    int arr_3[4] = {0, 1, 0, 0}; 
+    int arr_1[4] = {5, 5, 5, 5}; 
+    int arr_2[4] = {5, 5, 5, 5}; 
+    int arr_3[4] = {5, 5, 5,5}; 
     ATM_list.push_back(new ATM(false, Bank_list[0], true, arr_1, "1"));
     ATM_list.push_back(new ATM(true, Bank_list[1], false, arr_2, "1"));
     ATM_list.push_back(new ATM(true, Bank_list[1], false, arr_3, "1"));
@@ -1163,8 +1163,8 @@ int main(){
     User_list.push_back(new User("Jane"));
     User_list.push_back(new User("Kate"));
     Account_list.push_back(new Account(Bank_list[0], "David", "111-111-111111", 100000, "1"));
-    Account_list.push_back(new Account(Bank_list[1], "Jane", "222-222-222222", 5000, "1"));
-    Account_list.push_back(new Account(Bank_list[0], "Kate", "333-333-333333", 5000, "1"));
+    Account_list.push_back(new Account(Bank_list[1], "Jane", "222-222-222222", 100000, "1"));
+    Account_list.push_back(new Account(Bank_list[0], "Kate", "333-333-333333", 100000, "1"));
     Accounts_DB["111-111-111111"] = Account_list[0];
     Accounts_DB["222-222-222222"] = Account_list[1];
     Accounts_DB["333-333-333333"] = Account_list[2];   
