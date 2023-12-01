@@ -1095,15 +1095,6 @@ void Session(bool* IsFinished){
                             else if(continue_option == 0) throw 1005;
                             else print(3);
                         }
-                        print(30009);
-                        cout << transfer_fee;
-                        int deposited_fee = Deposit(this_ATM);
-                        if(deposited_fee != transfer_fee){
-                            print(30011);
-                            throw 1009;
-                        }
-                        if(this_account->get_balance() < transfer_fee) throw 1008;
-                        this_account->add_cash(-1*transfer_fee);
                         destination_account->add_cash(inserted_cash);
                         string local_history = "";
                         string tmp = ("[Transaction ID: " + to_string(++unique_indentifier) + "] Transfers " + to_string(inserted_cash) + " KRW from Account[ID: "+ this_account->get_account_number()+"] to Account[ID: "+ destination_account->get_account_number() +"]");
