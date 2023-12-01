@@ -973,7 +973,7 @@ void Session(bool* IsFinished){
                         print(20004);
                         cout << LimitAmountCash;
                         print(20005);
-                    }else if(stoll(x)%1000!=0) print(20008);
+                    }else if(stoll(x)%10000!=0) print(20008);
                     else if(x == "X") display_everything();
                     else break;
                 }
