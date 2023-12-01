@@ -30,7 +30,6 @@ class History{
         void add_current_history(string transaction);
         void update();
         void show_history();
-        void reset_history();
         string return_string_history();
 };
 History::History(){
@@ -55,9 +54,6 @@ void History::update(){
 }
 void History::show_history(){
     for(string line : transaction_history) cout << line << '\n';
-}
-void History::reset_history(){
-    this->transaction_history.clear();
 }
 string History::return_string_history(){
     string x;
@@ -376,7 +372,7 @@ void Set_Initial_Condition(){
     // print Account
     for(int i = 0; i<Account_list.size(); i++){
         Account* tmp_account(Account_list[i]);
-        cout<<"-------------"<<i+1<<"th ATM info-------------\n";
+        cout<<"-------------"<<i+1<<"th Account info-------------\n";
         cout<<"|Bank: "<<tmp_account->get_Bank_name()<<"\n";
         cout<<"|user name: "<<tmp_account->get_user_name()<<"\n";
         cout<<"|Account number: "<<tmp_account->get_account_number()<<'\n';
@@ -874,9 +870,9 @@ void Session(bool* IsFinished){
         int withdrawal_count = 0;
         if(card_num == this_ATM->get_admin_card_number()){
             //  ADMIN MODE
-            print(2);
             string x;
             while(1){
+                print(2);
                 cin >> x;
                 if(x == "0") return;
                 else if(x == "1") {
@@ -966,10 +962,10 @@ void Session(bool* IsFinished){
                 withdrawal_count++;
                 const int LimitAmountCash = 500000; // 한 번 transaction당 최대 출금 금액
                 if(withdrawal_count==4) throw 1007; // 출금 횟수 초과 예외 처리
-                print(20002);
                 string x;
                 int withdrawal_fee = (is_primary_bank_account) ? PrimaryWithdrawalFee : NonPrimaryWithDrawalFee;
                 while(1){
+                    print(20002);
                     cin >> x;
                     //수수료를 포함한 출금 금액
                     if(this_account->get_balance() < stoll(x)+withdrawal_fee) print(20003);
@@ -983,11 +979,11 @@ void Session(bool* IsFinished){
                 }
                 long long withdrawal_cash_amount = stoll(x);
                 // 수수료 출금
-                print(20006);
-                cout << withdrawal_fee;
-                print(20007);
                 string continue_option;
                 while(1){
+                    print(20006);
+                    cout << withdrawal_fee;
+                    print(20007);
                     cin >> continue_option;
                     if(continue_option != "Y" && continue_option != "N") print(3);
                     else if(continue_option == "X") display_everything();
@@ -997,7 +993,7 @@ void Session(bool* IsFinished){
                 if(withdrawal_cash_amount>this_ATM->get_total_cash()){
                     print(20009);
                     withdrawal_count--;
-                    goto withdrawal_again;
+                    break;
                 }
                 long long tmp_withdrawal_cash_amount = withdrawal_cash_amount;
                 int* cash_array = this_ATM->get_cash_array();
@@ -1008,7 +1004,7 @@ void Session(bool* IsFinished){
                 if(tmp_withdrawal_cash_amount!=0){
                     print(20009);
                     withdrawal_count--;
-                    goto withdrawal_again;
+                    break;
                 }
                 this_ATM->add_cash(50000, -amountof50000);
                 this_ATM->add_cash(10000, -amountof10000);
@@ -1032,8 +1028,8 @@ void Session(bool* IsFinished){
                     else if(transaction_number == "X") display_everything();
                     else print(3);
                 }
-                string destination;
                 print(30002);
+                string destination;
                 while(1){
                     cin >> destination;
                     if(Accounts_DB.find(destination) ==  Accounts_DB.end()) print(30003);
