@@ -1085,6 +1085,15 @@ void Session(bool* IsFinished){
 
                         int inserted_cash = Deposit(this_ATM);
                         inserted_cash-=transfer_fee;
+                        int continue_option;
+                        while(1){
+                            if(IsEnglish) cout << "The deposited amount of cash is " << inserted_cash << " KRW.\n[1] If correct, [2] If wrong : ";
+                            else cout << "입금된 금액은 " << inserted_cash << "원 입니다.\n 맞으면 [1], 틀리면 [2] : ";
+                            cin >> continue_option;
+                            if(continue_option == 1) break;
+                            else if(continue_option == 0) throw 1005;
+                            else print(3);
+                        }
                         destination_account->add_cash(inserted_cash);
                         string local_history = "";
                         string tmp = ("[Transaction ID: " + to_string(++unique_indentifier) + "] Transfers " + to_string(inserted_cash) + " KRW from Account[ID: "+ this_account->get_account_number()+"] to Account[ID: "+ destination_account->get_account_number() +"]");
